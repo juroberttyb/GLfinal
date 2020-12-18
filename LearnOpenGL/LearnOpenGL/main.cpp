@@ -326,6 +326,15 @@ public:
     }
 
 private:
+    void DefaultFlow(_window* window)
+    {
+        combine->ToScene();
+
+        cubemap.draw(window);
+        city.draw(window, cubemap.textureID);
+
+        combine->EndScene();
+    }
     void ShadowFlow(_window* window)
     {
         sp.depthmap.ToScene();
@@ -343,15 +352,6 @@ private:
         sp.draw(window, city.quad.vao, city.quad.vnum, city.quad.model);
 
         shad->EndScene();
-    }
-    void DefaultFlow(_window* window)
-    {
-        combine->ToScene();
-
-        cubemap.draw(window);
-        city.draw(window, cubemap.textureID);
-
-        combine->EndScene();
     }
     void NoShadowFlow(_window* window)
     {
