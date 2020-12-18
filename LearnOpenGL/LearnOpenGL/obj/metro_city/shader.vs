@@ -10,7 +10,6 @@ out VS_OUT
     vec3 V;       
 } vs_out;     
 
-uniform vec3 cameraPos;
 uniform vec3 light_pos;
 
 uniform mat4 model;

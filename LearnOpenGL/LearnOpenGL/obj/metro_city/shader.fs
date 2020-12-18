@@ -35,7 +35,7 @@ void main()
 
     if (shapeonly == 1)
     {
-        color = vec4(0.0, 0.0, 0.0, 1.0);
+        color = vec4(1.0, 1.0, 1.0, 1.0);
     }
     else
     {

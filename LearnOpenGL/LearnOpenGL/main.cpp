@@ -182,32 +182,16 @@ public:
             }
         } depthmap;
 
-        ShadowProg() // (GLuint depthMap, GLuint cubemap)
+        ShadowProg()
         {
             program = new ShaderProgram("include/shadow/shader.vs", "include/shadow/shader.fs");
         }
-        void draw(_window* window, unsigned int vao, int vnum, mat4 model, GLint sky, int mode)
+        void draw(_window* window, unsigned int vao, int vnum, mat4 model)
         {
-            glUseProgram(program->id);
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, depthmap.map);
-            glUniform1i(glGetUniformLocation(program->id, "shadow_tex"), 0);
-
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, sky);
-            glUniform1i(glGetUniformLocation(program->id, "skybox"), 1);
-
-            program->SetUniformVec3("cameraPos", window->camera.pos);
-            program->SetUniformInt("mode", mode);
-            program->SetUniformMat("model", model);
-            program->SetUniformMat("mv_matrix", window->view * model);
-
             mat4 shadow_matrix = depthmap.sbpv * model;
             program->SetUniformMat("shadow_matrix", shadow_matrix);
-            program->SetUniformMat("proj_matrix", window->project);
-
-            glUseProgram(0);
+            program->BindTexture("shadow_tex", GL_TEXTURE0, depthmap.map);
+            program->SetUniformMat("mvp", window->project * window->view * model);
 
             pipeline::draw(vao, vnum);
         }
@@ -275,13 +259,13 @@ public:
 
             loader.load(load_path.c_str());
         }
-        void draw(_window* window, unsigned int cubemapid)
+        void draw(_window* window, unsigned int cubemapid, int shapeonly = 0)
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapid);
 
+            program->SetUniformInt("shapeonly", shapeonly);
             program->SetUniformVec3("light_pos", light.pos);
-            program->SetUniformVec3("cameraPos", window->camera.pos);
             program->SetUniformMat("view", window->view);
             program->SetUniformMat("project", window->project);
             program->SetUniformMat("model", model);
@@ -289,12 +273,6 @@ public:
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-        }
-        void draw_shape(_window* window, unsigned int cubemapid)
-        {
-            program->SetUniformInt("shapeonly", 1);
-            draw(window, cubemapid);
-            program->SetUniformInt("shapeonly", 0);
         }
     };
 
@@ -361,8 +339,8 @@ private:
 
         shad->ToScene();
 
-        sp.draw(window, city.loader.vao, city.loader.vnum, city.model, cubemap.textureID, 2);
-        sp.draw(window, city.quad.vao, city.quad.vnum, city.quad.model, cubemap.textureID, 1);
+        sp.draw(window, city.loader.vao, city.loader.vnum, city.model);
+        sp.draw(window, city.quad.vao, city.quad.vnum, city.quad.model);
 
         shad->EndScene();
     }
@@ -379,7 +357,7 @@ private:
     {
         noshad->ToScene();
 
-        city.draw_shape(window, cubemap.textureID);
+        city.draw(window, cubemap.textureID, 1);
         city.quad.draw(window);
 
         noshad->EndScene();
