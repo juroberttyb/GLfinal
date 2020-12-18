@@ -2,7 +2,7 @@
 
 struct Light
 {
-    vec3 pos = vec3(-31.75, 26.05, -97.72);
+    vec3 pos = vec3(-20.0, 20.0, -20.0);
     vec3 center = vec3(0.0, 0.0, 0.0);
     vec3 up = vec3(0.0, 1.0, 0.0);
 } light;
