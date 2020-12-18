@@ -20,7 +20,7 @@ public:
         glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        float fov = 100.0f;
+        float fov = 100.0f, camera_speed = 8.0f;
     } camera;
     static struct TrackBall
     {
@@ -33,12 +33,10 @@ public:
         double x = 0, y = 0;
     } cursor;
 
-    static float zoom;
     glm::mat4 view, project;
     GLFWwindow* window;
     int w, h;
     float exposure = 1.0f;
-    vec3 LightPos = vec3(0.0f, 0.5f, 1.0f); // vec3(-0.2f, -1.0f, -0.3f); // vec3(0.0f, 0.5f, 1.0f);
 
     Window(int width, int height)
     {
@@ -91,6 +89,8 @@ public:
 
         glfwSetCursorPosCallback(window, mouse_callback);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+        glfwSetScrollCallback(window, scroll_callback);
     }
     void processInput()
     {
@@ -101,7 +101,7 @@ public:
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) // if it's not pressed, glfwGetKey returns GLFW_RELEASE
             glfwSetWindowShouldClose(window, true);
 
-        const float cameraSpeed = 16.0f * deltaTime; // adjust accordingly
+        const float cameraSpeed = camera.camera_speed * deltaTime; // adjust accordingly
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
             camera.pos += cameraSpeed * camera.front;
@@ -176,6 +176,19 @@ private:
         direction.y = sin(glm::radians(trackball.pitch));
         direction.z = sin(glm::radians(trackball.yaw)) * cos(glm::radians(trackball.pitch));
         camera.front = glm::normalize(direction);
+    }
+    static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+    {
+        float constant = 0.5f;
+
+        if (yoffset > 0)
+        {
+            camera.camera_speed += constant;
+        }
+        if (yoffset < 0 && camera.camera_speed - constant > 0)
+        {
+            camera.camera_speed -= constant;
+        }
     }
 
     float deltaTime = 0.0f;

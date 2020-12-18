@@ -1,5 +1,7 @@
 #include "include/includer.h"
 
+int default_w = 1440, default_h = 900;
+
 struct Light
 {
     vec3 pos = vec3(-20.0, 20.0, -20.0);
@@ -10,8 +12,6 @@ struct ShadowProj
 {
     float near = 0.0, far = 500.0, range = 250.0;
 } shadow;
-
-int default_w = 1440, default_h = 900;
 
 class _window : public Window
 {
@@ -364,18 +364,265 @@ private:
     }
 };
 
+class Unitest : public pipeline
+{
+public:
+    unsigned int vao, vnum;
+    mat4 model = mat4(1.0f);;
+
+    Unitest()
+    {
+        program = new ShaderProgram("obj/NormalMap/blinphong/shader.vs", "obj/NormalMap/blinphong/shader.fs");
+        program->TextureFromFile(string("obj/NormalMap/brickwall.jpg"));
+        program->TextureFromFile(string("obj/NormalMap/brickwall_normal.jpg"));
+        program->TextureFromFile(string("obj/NormalMap/container2_specular.png"));
+
+        CubeVAO();
+
+        // model = scale(model, vec3(1.0, 1.0, 1.0));
+        program->SetUniformMat("model", model);
+
+        program->SetUniformVec3("material.ambient", vec3(1.0f, 0.5f, 0.31f));
+        program->SetUniformVec3("material.diffuse", vec3(1.0f, 0.5f, 0.31f));
+        program->SetUniformVec3("material.specular", vec3(0.5f, 0.5f, 0.5f));
+        program->SetUniformFloat("material.shininess", 32.0f);
+
+        dirlight_set();
+        pointlight_set();
+        spotlight_set();
+    }
+    void CubeVAO()
+    {
+        float vertices[] = {
+            // positions          // normals           // texture coords
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+        };
+
+        int float_a_row = 8;
+        vnum = sizeof(vertices) / sizeof(float) / float_a_row;
+
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao); // glVertexAttribPointer()... would change content of VAO bound currently, so we should bind our VAO first
+        // A vertex array object stores the following:
+
+        unsigned int VBO;
+        glGenBuffers(1, &VBO); // generate a buffer
+        glBindBuffer(GL_ARRAY_BUFFER, VBO); // set buffer to opengl content
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        // position attribute
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, float_a_row * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        // color attribute
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, float_a_row * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        // tex coord
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, float_a_row * sizeof(float), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+
+        glBindVertexArray(0);
+    }
+    void dirlight_set()
+    {
+        // DirLight setting
+        struct DirLight {
+            vec3 direction;
+
+            vec3 ambient;
+            vec3 diffuse;
+            vec3 specular;
+        };
+
+        program->SetUniformVec3("dirLight.direction", vec3(-0.2f, -1.0f, -0.3f));
+
+        program->SetUniformVec3("dirLight.ambient", vec3(0.2f, 0.2f, 0.2f));
+        program->SetUniformVec3("dirLight.diffuse", vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
+        program->SetUniformVec3("dirLight.specular", vec3(1.0f, 1.0f, 1.0f));
+    }
+    void pointlight_set()
+    {
+        // PointLight setting
+        struct PointLight {
+            vec3 position;
+
+            float constant;
+            float linear;
+            float quadratic;
+
+            vec3 ambient;
+            vec3 diffuse;
+            vec3 specular;
+        };
+
+        string pointlight = "pointLights[",
+            position = "].position",
+            ambient = "].ambient",
+            diffuse = "].diffuse",
+            specular = "].specular",
+            constant = "].constant",
+            linear = "].linear",
+            quadratic = "].quadratic";
+
+        int lightcount = 4;
+        vec3 pointLightPositions[] = {
+            vec3(0.7f,  0.2f,  2.0f),
+            vec3(2.3f, -3.3f, -4.0f),
+            vec3(-4.0f,  2.0f, -12.0f),
+            vec3(0.0f,  0.0f, -3.0f)
+        };
+
+        for (int i = 0; i < lightcount; i++)
+        {
+            program->SetUniformVec3((pointlight + to_string(i) + position).c_str(), pointLightPositions[i]);
+
+            program->SetUniformVec3((pointlight + to_string(i) + ambient).c_str(), vec3(0.2f, 0.2f, 0.2f));
+            program->SetUniformVec3((pointlight + to_string(i) + diffuse).c_str(), vec3(0.5f, 0.5f, 0.5f));
+            program->SetUniformVec3((pointlight + to_string(i) + specular).c_str(), vec3(1.0f, 1.0f, 1.0f));
+
+            program->SetUniformFloat((pointlight + to_string(i) + constant).c_str(), 1.0f);
+            program->SetUniformFloat((pointlight + to_string(i) + linear).c_str(), 0.09f);
+            program->SetUniformFloat((pointlight + to_string(i) + quadratic).c_str(), 0.032f);
+        }
+    }
+    void spotlight_set()
+    {
+        // SpotLight setting
+        struct SpotLight {
+            vec3  position;
+            vec3  direction;
+            float cutOff;
+            float outerCutOff;
+
+            vec3 ambient;
+            vec3 diffuse;
+            vec3 specular;
+        };
+
+        program->SetUniformVec3("spotLight.direction", vec3(0.0f, 0.0f, -1.0f));
+        program->SetUniformVec3("spotLight.position", vec3(0.0f, 0.0f, 0.0f));
+
+        program->SetUniformVec3("spotLight.ambient", vec3(0.2f, 0.2f, 0.2f));
+        program->SetUniformVec3("spotLight.diffuse", vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
+        program->SetUniformVec3("spotLight.specular", vec3(1.0f, 1.0f, 1.0f));
+
+        program->SetUniformFloat("spotLight.constant", 1.0f);
+        program->SetUniformFloat("spotLight.linear", 0.09f);
+        program->SetUniformFloat("spotLight.quadratic", 0.032f);
+
+        program->SetUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        program->SetUniformFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+    }
+    void spotlight_update(Window* window)
+    {
+        program->SetUniformVec3("spotLight.position", window->camera.pos);
+        program->SetUniformVec3("spotLight.direction", window->camera.front);
+    }
+    void draw_one(Window* window)
+    {
+        spotlight_update(window);
+
+        program->SetUniformVec3("ViewPos", window->camera.pos);
+
+        program->SetUniformMat("view", window->view);
+        program->SetUniformMat("project", window->project);
+
+        program->BindTexture("material.diffuse", GL_TEXTURE0, program->TextureList[0]);
+        program->BindTexture("normalMap", GL_TEXTURE1, program->TextureList[1]);
+        program->BindTexture("material.specular", GL_TEXTURE2, program->TextureList[2]);
+
+        pipeline::draw(vao, vnum);
+
+        program->BindTexture("material.specular", GL_TEXTURE2, 0);
+        program->BindTexture("normalMap", GL_TEXTURE1, 0);
+        program->BindTexture("material.diffuse", GL_TEXTURE0, 0);
+    }
+
+    void draw(Window* window)
+    {
+        vec3 cubePositions[] = {
+            glm::vec3(0.0f,  0.0f,  0.0f),
+            glm::vec3(2.0f,  5.0f, -15.0f),
+            glm::vec3(-1.5f, -2.2f, -2.5f),
+            glm::vec3(-3.8f, -2.0f, -12.3f),
+            glm::vec3(2.4f, -0.4f, -3.5f),
+            glm::vec3(-1.7f,  3.0f, -7.5f),
+            glm::vec3(1.3f, -2.0f, -2.5f),
+            glm::vec3(1.5f,  2.0f, -2.5f),
+            glm::vec3(1.5f,  0.2f, -1.5f),
+            glm::vec3(-1.3f,  1.0f, -1.5f)
+        };
+
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            program->SetUniformMat("model", model);
+
+            draw_one(window);
+        }
+    }
+};
+
 void loop()
 {
     _window window(default_w, default_h);
     DiffRender diff;
     Frame PostEffect(string("include/PostEffect/shader.vs"), string("include/PostEffect/shader.fs"), true);
 
+    // Unitest cube;
+
     while (window.update())
     {
+        // cube.draw(&window);
+        // /*
         diff.DrawSceneTexture(&window);
 
         PostEffect.scene = diff.scene;
         PostEffect.draw(&window);
+        // */
     }
 }
 
