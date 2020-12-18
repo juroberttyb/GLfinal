@@ -1,0 +1,14 @@
+﻿  glad.c
+  main.cpp
+C:\Users\jurob\source\repos\LearnOpenGL\LearnOpenGL\include\Window.h(24,17): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\source\repos\LearnOpenGL\LearnOpenGL\include\Window.h(25,17): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\source\repos\LearnOpenGL\LearnOpenGL\include\Window.h(29,19): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\source\repos\LearnOpenGL\LearnOpenGL\include\Window.h(30,19): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\source\repos\LearnOpenGL\LearnOpenGL\include\Window.h(31,13): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\source\repos\LearnOpenGL\LearnOpenGL\include\Window.h(32,13): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\source\repos\LearnOpenGL\LearnOpenGL\include\Window.h(112,39): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+  正在產生程式碼
+  Previous IPDB not found, fall back to full compilation.
+  All 1730 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成程式碼產生
+  LearnOpenGL.vcxproj -> C:\Users\jurob\source\repos\LearnOpenGL\x64\Release\LearnOpenGL.exe

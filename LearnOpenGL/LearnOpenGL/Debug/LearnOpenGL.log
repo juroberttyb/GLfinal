@@ -1,0 +1,2 @@
+﻿  glad.c
+C:\Users\jurob\source\repos\LearnOpenGL\LearnOpenGL\glad.c(25,10): fatal error C1083: 無法開啟包含檔案: 'glad.h': No such file or directory
