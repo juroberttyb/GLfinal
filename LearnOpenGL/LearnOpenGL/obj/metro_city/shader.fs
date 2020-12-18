@@ -16,8 +16,6 @@ uniform vec3 diffuse_albedo = vec3(0.35);
 uniform vec3 specular_albedo = vec3(0.7);                                     
 uniform float specular_power = 200.0;  
 
-uniform int shapeonly = 1;
-
 void main()
 {
     // Normalize the incoming N, L and V vectors                               
@@ -33,13 +31,6 @@ void main()
     vec3 I = -V;
     vec3 R = reflect(I, normalize(N));
 
-    if (shapeonly == 1)
-    {
-        color = vec4(1.0, 1.0, 1.0, 1.0);
-    }
-    else
-    {
-        color = 0.35 * vec4(texture(skybox, R).rgb, 1.0) + 0.65 * vec4((diffuse + specular), 1.0);
-    }
+    color = 0.35 * vec4(texture(skybox, R).rgb, 1.0) + 0.65 * vec4((diffuse + specular), 1.0);
 }
 

@@ -186,12 +186,13 @@ public:
         {
             program = new ShaderProgram("include/shadow/shader.vs", "include/shadow/shader.fs");
         }
-        void draw(_window* window, unsigned int vao, int vnum, mat4 model)
+        void draw(_window* window, unsigned int vao, int vnum, mat4 model, int shapeonly = 0)
         {
             mat4 shadow_matrix = depthmap.sbpv * model;
             program->SetUniformMat("shadow_matrix", shadow_matrix);
             program->BindTexture("shadow_tex", GL_TEXTURE0, depthmap.map);
             program->SetUniformMat("mvp", window->project * window->view * model);
+            program->SetUniformInt("shapeonly", shapeonly);
 
             pipeline::draw(vao, vnum);
         }
@@ -259,12 +260,11 @@ public:
 
             loader.load(load_path.c_str());
         }
-        void draw(_window* window, unsigned int cubemapid, int shapeonly = 0)
+        void draw(_window* window, unsigned int cubemapid)
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapid);
 
-            program->SetUniformInt("shapeonly", shapeonly);
             program->SetUniformVec3("light_pos", light.pos);
             program->SetUniformMat("view", window->view);
             program->SetUniformMat("project", window->project);
@@ -357,8 +357,8 @@ private:
     {
         noshad->ToScene();
 
-        city.draw(window, cubemap.textureID, 1);
-        city.quad.draw(window);
+        sp.draw(window, city.loader.vao, city.loader.vnum, city.model, 1);
+        sp.draw(window, city.quad.vao, city.quad.vnum, city.quad.model, 1);
 
         noshad->EndScene();
     }
