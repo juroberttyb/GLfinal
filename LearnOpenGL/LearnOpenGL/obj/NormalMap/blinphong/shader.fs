@@ -57,18 +57,25 @@ in vec3 FragPos;
 in vec2 TexCoords;
 
 uniform vec3 ViewPos;
-
+uniform int on;
 uniform sampler2D normalMap;
 
 void main()
 {
-    // obtain normal from normal map in range [0,1]
-    // vec3 normal = texture(normalMap, TexCoords).rgb;
-    // transform normal vector to range [-1,1]
-    // vec3 norm = normalize(normal * 2.0 - 1.0);   
+    vec3 norm;
 
-    // properties
-    vec3 norm = normalize(Normal);
+    if (on == 1)
+    {
+        // obtain normal from normal map in range [0,1]
+        vec3 normal = texture(normalMap, TexCoords).rgb;
+        // transform normal vector to range [-1,1]
+        norm = normalize(normal * 2.0 - 1.0);   
+    }
+    else
+    {
+        norm = normalize(Normal);
+    }
+
     vec3 viewDir = normalize(ViewPos - FragPos);
     // phase 1: Directional lighting
     vec3 result = 1 * CalcDirLight(dirLight, norm, viewDir);

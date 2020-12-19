@@ -16,8 +16,8 @@ struct ShadowProj
 class _window : public Window
 {
 public:
-    bool Ipress = false, Fpress = false;
-    int mode = 0, post_effect = 0;
+    bool Ipress = false, Fpress = false, Tpress = false;
+    int mode = 0, post_effect = 0, on = 0;
 
     _window(int w, int h)
         : Window(w, h)
@@ -41,12 +41,22 @@ public:
 
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !Fpress)
         {
-            post_effect = (post_effect + 1) % 4;
+            post_effect = (post_effect + 1) % 3;
             Fpress = true;
         }
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)
         {
             Fpress = false;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !Tpress)
+        {
+            on = (on + 1) % 2;
+            Tpress = true;
+        }
+        if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE)
+        {
+            Tpress = false;
         }
     }
 
@@ -65,33 +75,17 @@ public:
 class Frame : public FrameBufferObject
 {
 public:
-    Frame(string vs = string("include/fbo/shader.vs"), string fs = string("include/fbo/shader.fs"), bool hdr = false)
+    Frame(string vs = string("include/fbo/shader.vs"), string fs = string("include/fbo/shader.fs"))
         : FrameBufferObject(default_w, default_h, vs, fs)
     {
-        if (hdr)
-        {
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-
-            glGenTextures(1, &scene);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, scene);
-
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, scene, 0);
-        }
+    }
+    Frame(unsigned int FromScene, string vs = string("include/fbo/shader.vs"), string fs = string("include/fbo/shader.fs"))
+        : FrameBufferObject(default_w, default_h, vs, fs)
+    {
+        scene = FromScene;
     }
     void draw(_window* window)
     {
-        program->SetUniformInt("xpos", window->cursor.x);
-        program->SetUniformInt("ypos", window->h - window->cursor.y);
-        program->SetUniformFloat("time", glfwGetTime());
-        program->SetUniformFloat("exposure", window->exposure);
         program->SetUniformInt("PostEffect", window->post_effect);
         FrameBufferObject::draw();
     }
@@ -364,13 +358,13 @@ private:
     }
 };
 
-class Unitest : public pipeline
+class NormalMapCube : public pipeline
 {
 public:
     unsigned int vao, vnum;
     mat4 model = mat4(1.0f);;
 
-    Unitest()
+    NormalMapCube()
     {
         program = new ShaderProgram("obj/NormalMap/blinphong/shader.vs", "obj/NormalMap/blinphong/shader.fs");
         program->TextureFromFile(string("obj/NormalMap/brickwall.jpg"));
@@ -558,12 +552,15 @@ public:
         program->SetUniformVec3("spotLight.position", window->camera.pos);
         program->SetUniformVec3("spotLight.direction", window->camera.front);
     }
-    void draw_one(Window* window)
+    void draw(_window* window)
     {
         spotlight_update(window);
 
+        program->SetUniformInt("on", window->on);
+
         program->SetUniformVec3("ViewPos", window->camera.pos);
 
+        program->SetUniformMat("model", model);
         program->SetUniformMat("view", window->view);
         program->SetUniformMat("project", window->project);
 
@@ -577,50 +574,25 @@ public:
         program->BindTexture("normalMap", GL_TEXTURE1, 0);
         program->BindTexture("material.diffuse", GL_TEXTURE0, 0);
     }
-
-    void draw(Window* window)
-    {
-        vec3 cubePositions[] = {
-            glm::vec3(0.0f,  0.0f,  0.0f),
-            glm::vec3(2.0f,  5.0f, -15.0f),
-            glm::vec3(-1.5f, -2.2f, -2.5f),
-            glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3(2.4f, -0.4f, -3.5f),
-            glm::vec3(-1.7f,  3.0f, -7.5f),
-            glm::vec3(1.3f, -2.0f, -2.5f),
-            glm::vec3(1.5f,  2.0f, -2.5f),
-            glm::vec3(1.5f,  0.2f, -1.5f),
-            glm::vec3(-1.3f,  1.0f, -1.5f)
-        };
-
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            program->SetUniformMat("model", model);
-
-            draw_one(window);
-        }
-    }
 };
 
 void loop()
 {
     _window window(default_w, default_h);
     DiffRender diff;
-    Frame PostEffect(string("include/PostEffect/shader.vs"), string("include/PostEffect/shader.fs"), true);
+    Frame PostEffect(diff.scene, string("include/PostEffect/shader.vs"), string("include/PostEffect/shader.fs"));
 
-    // Unitest cube;
+    // NormalMapCube cube;
+
+    // ModelLoader dragon("obj/dragon/uploads_files_1969357_2.obj");
 
     while (window.update())
     {
         // cube.draw(&window);
+
+        // dragon.Draw(&window);
         // /*
         diff.DrawSceneTexture(&window);
-
-        PostEffect.scene = diff.scene;
         PostEffect.draw(&window);
         // */
     }

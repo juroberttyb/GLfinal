@@ -6,8 +6,6 @@ uniform sampler2D screen;
 
 uniform int PostEffect;
 
-uniform float exposure;
-
 float sigmoid(vec3 v)
 {
     float x = 0.2126 * v.r + 0.7152 * v.g + 0.0722 * v.b;
@@ -100,17 +98,5 @@ void main()
         value = s * value;
     
         FragColor = vec4(value, 1.0);
-    }
-    else if (PostEffect == 3)
-    {
-        const float gamma = 2.2;
-        vec3 hdrColor = texture(screen, TexCoords).rgb;
-  
-        // exposure tone mapping
-        vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
-        // gamma correction 
-        mapped = pow(mapped, vec3(1.0 / gamma));
-  
-        FragColor = vec4(mapped, 1.0);
     }
 }
