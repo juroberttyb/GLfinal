@@ -4,13 +4,13 @@ int default_w = 1440, default_h = 900;
 
 struct Light
 {
-    vec3 pos = vec3(-20.0, 20.0, -20.0);
+    vec3 pos = vec3(-10.0, 10.0, -10.0);
     vec3 center = vec3(0.0, 0.0, 0.0);
     vec3 up = vec3(0.0, 1.0, 0.0);
 } light;
 struct ShadowProj
 {
-    float near = 0.0, far = 500.0, range = 250.0;
+    float near = 0.0, far = 500.0, range = 150.0;
 } shadow;
 
 class _window : public Window
@@ -58,8 +58,16 @@ public:
         {
             Tpress = false;
         }
-    }
 
+        if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        {
+            light.pos.x += 1;
+        }
+        if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+        {
+            light.pos.x -= 1;
+        }
+    }
     bool update()
     {
         glfwPollEvents();
@@ -144,16 +152,16 @@ public:
                 glReadBuffer(GL_NONE);
 
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+            } 
+            void ToScene()
+            {
                 mat4 proj = ortho(-shadow.range, shadow.range, -shadow.range, shadow.range, shadow.near, shadow.far);
                 mat4 view = lookAt(light.pos, light.center, light.up);
                 vp = proj * view;
 
                 mat4 sb = translate(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f)) * scale(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f));
                 sbpv = sb * vp;
-            } 
-            void ToScene()
-            {
+
                 glUseProgram(program->id);
                 glBindFramebuffer(GL_FRAMEBUFFER, fbo);
                 glClear(GL_DEPTH_BUFFER_BIT);
@@ -575,6 +583,31 @@ public:
         program->BindTexture("material.diffuse", GL_TEXTURE0, 0);
     }
 };
+class Sponza : public pipeline
+{
+public:
+    mat4 model = mat4(1.0f);
+
+    Sponza()
+    {
+        program = new ShaderProgram("obj/sponza/shader.vs", "obj/sponza/shader.fs");
+        // float scaling = 0.05f;
+        // model = glm::scale(glm::mat4(1.0f), glm::vec3(scaling, scaling, scaling));
+
+        loader = new ModelLoader("obj/sponza/sponza.obj");
+    }
+    void draw(_window* window)
+    {
+        program->SetUniformVec3("light_pos", light.pos);
+        program->SetUniformInt("on", window->on);
+
+        program->SetUniformMat("model", model);
+        program->SetUniformMat("view", window->view);
+        program->SetUniformMat("project", window->project);
+
+        loader->Draw(program->id);
+    }
+};
 
 void loop()
 {
@@ -583,18 +616,15 @@ void loop()
     Frame PostEffect(diff.scene, string("include/PostEffect/shader.vs"), string("include/PostEffect/shader.fs"));
 
     // NormalMapCube cube;
-
-    // ModelLoader dragon("obj/dragon/uploads_files_1969357_2.obj");
+    // Sponza sponza;
 
     while (window.update())
     {
         // cube.draw(&window);
-
-        // dragon.Draw(&window);
-        // /*
+        // sponza.draw(&window);
+        
         diff.DrawSceneTexture(&window);
         PostEffect.draw(&window);
-        // */
     }
 }
 

@@ -1,9 +1,9 @@
 ﻿  main.cpp
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(541,20): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Texture' 現在已經定義為 'private'，之前它定義為 'public'
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(542,20): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Texture' 現在已經定義為 'private'，之前它定義為 'public'
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(306): message : 請參閱 'ModelLoader::Texture' 的宣告
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(547,16): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Mesh' 現在已經定義為 'private'，之前它定義為 'public'
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(548,16): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Mesh' 現在已經定義為 'private'，之前它定義為 'public'
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(307): message : 請參閱 'ModelLoader::Mesh' 的宣告
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(601,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLsizei'，資料可能遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(609,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLsizei'，資料可能遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(97,35): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(152,31): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(153,31): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失

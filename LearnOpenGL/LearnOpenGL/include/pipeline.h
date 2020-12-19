@@ -315,6 +315,7 @@ public:
     // constructor, expects a filepath to a 3D model.
     ModelLoader(string const& path, bool gamma = false) : gammaCorrection(gamma)
     {
+        cout << path << endl;
         loadModel(path);
     }
 
@@ -571,6 +572,9 @@ private:
             unsigned int specularNr = 1;
             unsigned int normalNr = 1;
             unsigned int hNr = 1;
+
+            // cout << "textures size: " << textures.size() << endl;
+
             for (unsigned int i = 0; i < textures.size(); i++)
             {
                 // retrieve texture number (the N in diffuse_textureN)
@@ -585,6 +589,8 @@ private:
                 else if (name == "texture_h")
                     number = to_string(hNr++); // transfer unsigned int to stream
 
+                // cout << "texture: " << name + number << endl;
+
                 // now set the sampler to the correct texture unit
                 glUseProgram(pid);
                 glUniform1i(glGetUniformLocation(pid, (name + number).c_str()), i);
@@ -594,6 +600,8 @@ private:
                 glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
                 glBindTexture(GL_TEXTURE_2D, textures[i].id);
             }
+
+            // exit(0);
 
             // draw mesh
             glUseProgram(pid);
