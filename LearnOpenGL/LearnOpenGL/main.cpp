@@ -4,7 +4,7 @@ int default_w = 1440, default_h = 900;
 
 struct Light
 {
-    vec3 pos = vec3(0.0, 10.0, -1.0);
+    vec3 pos = vec3(0.0, 10.0, -10.0);
     vec3 center = vec3(0.0, 0.0, 0.0);
     vec3 up = vec3(0.0, 1.0, 0.0);
 } light;
@@ -61,11 +61,11 @@ public:
 
         if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
         {
-            light.pos.x += 1;
+            light.pos = rotate(mat4(1.0f), 0.1f, vec3(0.0, 1.0, 0.0)) * vec4(light.pos, 1.0f);
         }
         if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
         {
-            light.pos.x -= 1;
+            light.pos = rotate(mat4(1.0f), -0.1f, vec3(0.0, 1.0, 0.0)) * vec4(light.pos, 1.0f);
         }
     }
     bool update()
@@ -119,7 +119,8 @@ public:
 
             CubeMap::draw();
         }
-    };
+    }
+    sky;
     class ShadowProg : public pipeline
     {
     public:
@@ -198,15 +199,16 @@ public:
 
             pipeline::draw(vao, vnum);
         }
-    };
+    }
+    sp;
     class Assimp_obj : public pipeline
     {
     public:
         mat4 model = mat4(1.0f);
 
-        Assimp_obj(const char *vs, const char *fs, const char *path)
+        Assimp_obj(const char *path)
         {
-            program = new ShaderProgram(vs, fs);
+            program = new ShaderProgram("include/AssimpShader/shader.vs", "include/AssimpShader/shader.fs");
             loader = new ModelLoader(path);
         }
         void draw(_window* window)
@@ -220,16 +222,17 @@ public:
 
             loader->Draw(program->id);
         }
-    };
+    }
+    oak = Assimp_obj("obj/oak/white_oak.obj");
     class Tiny_obj : public pipeline
     {
     public:
         TinyOjectLoader loader;
         glm::mat4 model = glm::mat4(1.0f);
 
-        Tiny_obj(const char* vs, const char* fs, const char* path)
+        Tiny_obj(const char* path)
         {
-            program = new ShaderProgram(vs, fs);
+            program = new ShaderProgram("include/TinyobjShader/shader.vs", "include/TinyobjShader/shader.fs");
 
             loader.load(path);
         }
@@ -247,7 +250,8 @@ public:
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         }
-    };
+    } 
+    city = Tiny_obj("obj/metro_city/Metro city.obj");
     class Quad : public pipeline
     {
     public:
@@ -297,13 +301,10 @@ public:
 
             pipeline::draw(vao, vnum);
         }
-    } quad;
+    } 
+    quad;
 
     Frame* combine, * shad, * noshad;
-    ShadowProg sp;
-    Sky cubemap;
-    Tiny_obj city = Tiny_obj("obj/metro_city/shader.vs", "obj/metro_city/shader.fs", "obj/metro_city/Metro city.obj");
-    Assimp_obj oak = Assimp_obj("obj/oak/shader.vs", "obj/oak/shader.fs", "obj/oak/white_oak.obj");
 
     DiffRender(string vs = string("obj/DiffRender/shader.vs"), string fs = string("obj/DiffRender/shader.fs"))
         : Frame(vs, fs), 
@@ -312,10 +313,10 @@ public:
         noshad{ new Frame() }
     {
         float scaling = 0.01f;
-        mat4 model = glm::scale(mat4(1.0f), glm::vec3(scaling, scaling, scaling));
+        mat4 model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
         city.model = model;
 
-        model = glm::scale(mat4(1.0f), glm::vec3(scaling, scaling, scaling));
+        model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
         oak.model = model;
     }
 
@@ -349,8 +350,8 @@ private:
     {
         combine->ToScene();
 
-        cubemap.draw(window);
-        city.draw(window, cubemap.textureID);
+        sky.draw(window);
+        city.draw(window, sky.textureID);
         oak.draw(window);
 
         combine->EndScene();
