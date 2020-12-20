@@ -19,13 +19,13 @@ uniform sampler2D texture_normal1;
 uniform sampler2D texture_h1;
 uniform float specular_power = 200.0;  
 
-uniform int on;
+uniform int NormalOn;
 
 void main()
 {
     vec3 N;
 
-    if (on == 1)
+    if (NormalOn == 1)
     {
         // obtain normal from normal map in range [0,1]
         N = texture(texture_normal1, fs_in.texcoord).rgb;

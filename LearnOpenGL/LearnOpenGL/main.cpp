@@ -16,8 +16,8 @@ struct ShadowProj
 class _window : public Window
 {
 public:
-    bool Ipress = false, Fpress = false, Tpress = false;
-    int mode = 0, post_effect = 0, on = 0;
+    bool Ipress = false, Fpress = false, Npress = false;
+    int mode = 0, post_effect = 0, NormalOn = 1;
 
     _window(int w, int h)
         : Window(w, h)
@@ -49,14 +49,14 @@ public:
             Fpress = false;
         }
 
-        if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !Tpress)
+        if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !Npress)
         {
-            on = (on + 1) % 2;
-            Tpress = true;
+            NormalOn = (NormalOn + 1) % 2;
+            Npress = true;
         }
         if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE)
         {
-            Tpress = false;
+            Npress = false;
         }
 
         if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
@@ -216,7 +216,7 @@ public:
         void draw(_window* window)
         {
             program->SetUniformVec3("light_pos", light.pos);
-            program->SetUniformInt("on", window->on);
+            program->SetUniformInt("NormalOn", window->NormalOn);
 
             program->SetUniformMat("model", model);
             program->SetUniformMat("view", window->view);
@@ -374,6 +374,8 @@ private:
 
         sp.depthmap.draw(city.loader.vao, city.loader.vnum, city.model);
         sp.depthmap.draw(city.quad.vao, city.quad.vnum, city.quad.model);
+        for (int i = 0; i < oak.loader->meshes.size(); i++)
+            sp.depthmap.draw(oak.loader->meshes[i].VAO, oak.loader->meshes[i].vertices.size(), oak.model);
 
         sp.depthmap.EndScene();
 
@@ -383,6 +385,8 @@ private:
 
         sp.draw(window, city.loader.vao, city.loader.vnum, city.model);
         sp.draw(window, city.quad.vao, city.quad.vnum, city.quad.model);
+        for (int i = 0; i < oak.loader->meshes.size(); i++)
+            sp.draw(window, oak.loader->meshes[i].VAO, oak.loader->meshes[i].vertices.size(), oak.model);
 
         shad->EndScene();
     }
@@ -392,6 +396,8 @@ private:
 
         sp.draw(window, city.loader.vao, city.loader.vnum, city.model, 1);
         sp.draw(window, city.quad.vao, city.quad.vnum, city.quad.model, 1);
+        for (int i = 0; i < oak.loader->meshes.size(); i++)
+            sp.draw(window, oak.loader->meshes[i].VAO, oak.loader->meshes[i].vertices.size(), oak.model, 1);
 
         noshad->EndScene();
     }
