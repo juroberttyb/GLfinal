@@ -8,6 +8,7 @@ in VS_OUT {
     vec3 V;  
     vec2 texcoord;
     mat3 TBN;
+    vec4 FragPosLightSpace;
 } fs_in;  
 
 // uniform samplerCube skybox;
@@ -20,6 +21,24 @@ uniform sampler2D texture_h1;
 uniform float specular_power = 200.0;  
 
 uniform int NormalOn;
+
+uniform sampler2D shadowMap;	
+
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // check whether current frag pos is in shadow
+    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+
+    return shadow;
+}  
 
 void main()
 {
@@ -52,6 +71,10 @@ void main()
     vec3 diffuse = max(dot(N, L), 0.0) * texture(texture_diffuse1, fs_in.texcoord).rgb;  
     vec3 specular = pow(max(dot(N, H), 0.0), specular_power) * texture(texture_specular1, fs_in.texcoord).rgb;
 
-    color = vec4((ambient + diffuse + specular), 1.0);
+    // color = vec4((ambient + diffuse + specular), 1.0);
+    float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
+    vec3 lighting = ambient + (1.0 - shadow) * (diffuse + specular);
+
+    color = vec4(lighting, 1.0);
 // */
 }

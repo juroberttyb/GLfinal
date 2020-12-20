@@ -12,6 +12,7 @@ out VS_OUT
     vec3 V;  
     vec2 texcoord;
     mat3 TBN;
+    vec4 FragPosLightSpace;
 } vs_out;     
 
 uniform vec3 light_pos;
@@ -19,6 +20,7 @@ uniform vec3 light_pos;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 project;
+uniform mat4 lightSpaceMatrix;
 
 void main()
 {
@@ -35,4 +37,6 @@ void main()
     vec3 B = normalize(normal_matrix * aBitangent);
     vec3 N = normalize(normal_matrix * aNormal);
     vs_out.TBN = mat3(T, B, N);
+
+    vs_out.FragPosLightSpace = lightSpaceMatrix * model * vec4(aPos, 1.0);
 } 

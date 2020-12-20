@@ -8,6 +8,7 @@ out VS_OUT
     vec3 N;                                            
     vec3 L;                                            
     vec3 V;       
+    vec4 FragPosLightSpace;
 } vs_out;     
 
 uniform vec3 light_pos;
@@ -15,6 +16,7 @@ uniform vec3 light_pos;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 project;
+uniform mat4 lightSpaceMatrix;
 
 void main()
 {
@@ -23,4 +25,6 @@ void main()
     vs_out.L = (view * vec4(light_pos, 1.0)).xyz - P.xyz;
     vs_out.V = -P.xyz;
     gl_Position = project * P;
+
+    vs_out.FragPosLightSpace = lightSpaceMatrix * model * vec4(aPos, 1.0);
 } 
