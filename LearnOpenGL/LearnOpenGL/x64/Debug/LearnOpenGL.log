@@ -14,4 +14,5 @@ C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(160,27):
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(365,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(375,1): warning C4267: '引數': 將 'size_t' 轉換為 'int'，資料可能遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(385,1): warning C4267: '引數': 將 'size_t' 轉換為 'int'，資料可能遺失
+LINK : warning LNK4098: 預設的程式庫 'MSVCRT' 與其他使用的程式庫衝突，請使用 /NODEFAULTLIB:library
   LearnOpenGL.vcxproj -> C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\x64\Debug\LearnOpenGL.exe

@@ -369,7 +369,7 @@ private:
 
 
         shad->ToScene();
-
+        
         sp.draw(window, city.loader.vao, city.loader.vnum, city.model);
         for (int i = 0; i < oak.loader->meshes.size(); i++)
             sp.draw(window, oak.loader->meshes[i].VAO, oak.loader->meshes[i].vertices.size(), oak.model);
