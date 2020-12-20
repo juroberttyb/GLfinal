@@ -4,13 +4,13 @@ int default_w = 1440, default_h = 900;
 
 struct Light
 {
-    vec3 pos = vec3(-20.0, 20.0, -20.0);
+    vec3 pos = vec3(0.0, 10.0, -1.0);
     vec3 center = vec3(0.0, 0.0, 0.0);
     vec3 up = vec3(0.0, 1.0, 0.0);
 } light;
 struct ShadowProj
 {
-    float near = 0.0, far = 500.0, range = 150.0;
+    float near = 0.0, far = 100, range = 25.0;
 } shadow;
 
 class _window : public Window
@@ -199,7 +199,6 @@ public:
             pipeline::draw(vao, vnum);
         }
     };
-    // assimp obj for normal mapping
     class Assimp_obj : public pipeline
     {
     public:
@@ -208,9 +207,6 @@ public:
         Assimp_obj(const char *vs, const char *fs, const char *path)
         {
             program = new ShaderProgram(vs, fs);
-            float scaling = 0.1f;
-            model = glm::scale(glm::mat4(1.0f), glm::vec3(scaling, scaling, scaling));
-
             loader = new ModelLoader(path);
         }
         void draw(_window* window)
@@ -225,61 +221,9 @@ public:
             loader->Draw(program->id);
         }
     };
-    // tiny obj for shadow mapping
     class Tiny_obj : public pipeline
     {
     public:
-        class Quad : public pipeline
-        {
-        public:
-            unsigned int vao, vnum;
-            glm::mat4 model = mat4(1.0f);
-
-            Quad()
-            {
-                program = new ShaderProgram("obj/quad/shader.vs", "obj/quad/shader.fs");
-
-                CubeLoad();
-            }
-            void CubeLoad()
-            {
-                float vertices[] = {
-                        1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 0.0f,
-                        1.0f,  0.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
-                        -1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 0.0f,
-                        -1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 0.0f,
-                        -1.0f,  0.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
-                        1.0f,  0.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
-                };
-
-                vnum = sizeof(vertices) / sizeof(float) / 6;
-
-                glGenVertexArrays(1, &vao);
-                glBindVertexArray(vao);
-
-                unsigned int VBO;
-                glGenBuffers(1, &VBO);
-                glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-                glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-                glEnableVertexAttribArray(0);
-                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-                glEnableVertexAttribArray(1);
-
-                glBindVertexArray(0);
-            }
-            void draw(_window* window)
-            {
-                program->SetUniformMat("model", model);
-                program->SetUniformMat("view", window->view);
-                program->SetUniformMat("project", window->project);
-
-                pipeline::draw(vao, vnum);
-            }
-        } quad;
-
         TinyOjectLoader loader;
         glm::mat4 model = glm::mat4(1.0f);
 
@@ -304,13 +248,61 @@ public:
             glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         }
     };
+    class Quad : public pipeline
+    {
+    public:
+        unsigned int vao, vnum;
+        glm::mat4 model = mat4(1.0f);
+
+        Quad()
+        {
+            program = new ShaderProgram("obj/quad/shader.vs", "obj/quad/shader.fs");
+
+            CubeLoad();
+        }
+        void CubeLoad()
+        {
+            float vertices[] = {
+                    1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 0.0f,
+                    1.0f,  0.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
+                    -1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 0.0f,
+                    -1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 0.0f,
+                    -1.0f,  0.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
+                    1.0f,  0.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
+            };
+
+            vnum = sizeof(vertices) / sizeof(float) / 6;
+
+            glGenVertexArrays(1, &vao);
+            glBindVertexArray(vao);
+
+            unsigned int VBO;
+            glGenBuffers(1, &VBO);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+
+            glBindVertexArray(0);
+        }
+        void draw(_window* window)
+        {
+            program->SetUniformMat("model", model);
+            program->SetUniformMat("view", window->view);
+            program->SetUniformMat("project", window->project);
+
+            pipeline::draw(vao, vnum);
+        }
+    } quad;
 
     Frame* combine, * shad, * noshad;
     ShadowProg sp;
     Sky cubemap;
-    // tiny obj for obj used with shadow mapping
     Tiny_obj city = Tiny_obj("obj/metro_city/shader.vs", "obj/metro_city/shader.fs", "obj/metro_city/Metro city.obj");
-    // assimp obj for obj used with normal mapping
     Assimp_obj oak = Assimp_obj("obj/oak/shader.vs", "obj/oak/shader.fs", "obj/oak/white_oak.obj");
 
     DiffRender(string vs = string("obj/DiffRender/shader.vs"), string fs = string("obj/DiffRender/shader.fs"))
@@ -319,17 +311,12 @@ public:
         shad{ new Frame() }, 
         noshad{ new Frame() }
     {
-        mat4 model = mat4(1.0f);
-        model = translate(model, glm::vec3(0, 2.5, 0));
-        model = scale(model, glm::vec3(0.1, 0.1, 0.1));
-
+        float scaling = 0.01f;
+        mat4 model = glm::scale(mat4(1.0f), glm::vec3(scaling, scaling, scaling));
         city.model = model;
 
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0, -0.6, 0));
-        model = glm::scale(model, glm::vec3(200, 1, 200));
-
-        city.quad.model = model;
+        model = glm::scale(mat4(1.0f), glm::vec3(scaling, scaling, scaling));
+        oak.model = model;
     }
 
     void Flow(_window* window)
@@ -373,7 +360,6 @@ private:
         sp.depthmap.ToScene();
 
         sp.depthmap.draw(city.loader.vao, city.loader.vnum, city.model);
-        sp.depthmap.draw(city.quad.vao, city.quad.vnum, city.quad.model);
         for (int i = 0; i < oak.loader->meshes.size(); i++)
             sp.depthmap.draw(oak.loader->meshes[i].VAO, oak.loader->meshes[i].vertices.size(), oak.model);
 
@@ -384,7 +370,6 @@ private:
         shad->ToScene();
 
         sp.draw(window, city.loader.vao, city.loader.vnum, city.model);
-        sp.draw(window, city.quad.vao, city.quad.vnum, city.quad.model);
         for (int i = 0; i < oak.loader->meshes.size(); i++)
             sp.draw(window, oak.loader->meshes[i].VAO, oak.loader->meshes[i].vertices.size(), oak.model);
 
@@ -395,7 +380,6 @@ private:
         noshad->ToScene();
 
         sp.draw(window, city.loader.vao, city.loader.vnum, city.model, 1);
-        sp.draw(window, city.quad.vao, city.quad.vnum, city.quad.model, 1);
         for (int i = 0; i < oak.loader->meshes.size(); i++)
             sp.draw(window, oak.loader->meshes[i].VAO, oak.loader->meshes[i].vertices.size(), oak.model, 1);
 
