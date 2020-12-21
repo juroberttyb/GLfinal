@@ -1,10 +1,9 @@
-﻿  glad.c
-  main.cpp
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(542,20): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Texture' 現在已經定義為 'private'，之前它定義為 'public'
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(306): message : 請參閱 'ModelLoader::Texture' 的宣告
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(548,16): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Mesh' 現在已經定義為 'private'，之前它定義為 'public'
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(307): message : 請參閱 'ModelLoader::Mesh' 的宣告
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(609,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLsizei'，資料可能遺失
+﻿  main.cpp
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(543,20): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Texture' 現在已經定義為 'private'，之前它定義為 'public'
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(307): message : 請參閱 'ModelLoader::Texture' 的宣告
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(549,16): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Mesh' 現在已經定義為 'private'，之前它定義為 'public'
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(308): message : 請參閱 'ModelLoader::Mesh' 的宣告
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(610,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLsizei'，資料可能遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(97,35): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(152,31): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(153,31): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
@@ -12,7 +11,6 @@ C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(157,23):
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(158,23): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(159,27): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(160,27): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(323,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(350,42): warning C4101: 'gColorSpec': 未參考的區域變數
-LINK : warning LNK4098: 預設的程式庫 'MSVCRT' 與其他使用的程式庫衝突，請使用 /NODEFAULTLIB:library
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(317,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(341,42): warning C4101: 'gColorSpec': 未參考的區域變數
   LearnOpenGL.vcxproj -> C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\x64\Debug\LearnOpenGL.exe

@@ -12,7 +12,7 @@ struct ShadowProj
 {
     float near = 0.0, far = 100, range = 25.0;
     mat4 vp;
-    unsigned int scene;
+    unsigned int map;
 } shadow;
 
 class _window : public Window
@@ -127,8 +127,6 @@ public:
     {
     public:
         GLuint fbo;
-        GLuint map;
-        mat4 vp, sbpv;
         int size = 4096;
 
         DepthMap()
@@ -138,15 +136,15 @@ public:
             glGenFramebuffers(1, &fbo);
             glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-            glGenTextures(1, &map);
-            glBindTexture(GL_TEXTURE_2D, map);
+            glGenTextures(1, &shadow.map);
+            glBindTexture(GL_TEXTURE_2D, shadow.map);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, size, size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_REPEAT);
 
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, map, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow.map, 0);
 
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
@@ -157,10 +155,7 @@ public:
         {
             mat4 proj = ortho(-shadow.range, shadow.range, -shadow.range, shadow.range, shadow.near, shadow.far);
             mat4 view = lookAt(light.pos, light.center, light.up);
-            vp = proj * view;
-
-            mat4 sb = translate(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f)) * scale(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f));
-            sbpv = sb * vp;
+            shadow.vp = proj * view;
 
             glUseProgram(program->id);
             glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -176,11 +171,10 @@ public:
         {
             glDisable(GL_POLYGON_OFFSET_FILL);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glViewport(0, 0, default_w, default_h);
         }
         void draw(GLint vao, GLint vnum, mat4 model)
         {
-            program->SetUniformMat("mvp", vp * model);
+            program->SetUniformMat("mvp", shadow.vp * model);
             pipeline::draw(vao, vnum);
         }
     } 
@@ -200,7 +194,7 @@ public:
             program->SetUniformVec3("light_pos", light.pos);
             
             program->SetUniformInt("NormalOn", window->NormalOn);
-            program->BindTexture("shadowMap", GL_TEXTURE5, shadow.scene);
+            program->BindTexture("shadowMap", GL_TEXTURE5, shadow.map);
             glActiveTexture(GL_TEXTURE0);
 
             program->SetUniformMat("model", model);
@@ -234,7 +228,7 @@ public:
 
             program->SetUniformVec3("light_pos", light.pos);
 
-            program->BindTexture("shadowMap", GL_TEXTURE5, shadow.scene);
+            program->BindTexture("shadowMap", GL_TEXTURE5, shadow.map);
             glActiveTexture(GL_TEXTURE0);
 
             program->SetUniformMat("view", window->view);
@@ -323,9 +317,6 @@ public:
             dp.draw(oak.loader->meshes[i].VAO, oak.loader->meshes[i].vertices.size(), oak.model);
 
         dp.EndScene();
-
-        shadow.vp = dp.vp;
-        shadow.scene = dp.map;
 
         ToScene();
 

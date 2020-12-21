@@ -179,6 +179,7 @@ public:
 
         glActiveTexture(TextureUnit);
         glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE0);
     }
 
     void SetUniformMat(const char* name, glm::mat4 value)
