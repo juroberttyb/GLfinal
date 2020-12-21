@@ -2,7 +2,7 @@
 out vec4 FragColor;
   
 in vec2 TexCoords;
-uniform sampler2D screen;
+uniform sampler2D scene;
 
 uniform sampler2D noise;
 uniform int mode;
@@ -19,7 +19,7 @@ void main()
 { 
     if (mode == 0)
     {
-        FragColor = texture(screen, TexCoords);
+        FragColor = texture(scene, TexCoords);
     }
     else if (mode == 1)
     {
@@ -31,7 +31,7 @@ void main()
             for (int j = -half_size; j <= half_size; ++j)
             {
                 ivec2 coord = ivec2(gl_FragCoord.xy) + ivec2(i, j);
-                color_sum += texelFetch(screen, coord, 0);
+                color_sum += texelFetch(scene, coord, 0);
             }
         }
 
@@ -65,7 +65,7 @@ void main()
         vec3 sampleTex[9];
         for(int i = 0; i < 9; i++)
         {
-            sampleTex[i] = vec3(texture(screen, TexCoords.st + offsets[i]));
+            sampleTex[i] = vec3(texture(scene, TexCoords.st + offsets[i]));
         }
         vec3 col = vec3(0.0);
         for(int i = 0; i < 9; i++)
@@ -86,7 +86,7 @@ void main()
             for (int j = -half_size; j <= half_size; ++j)
             {
                 ivec2 coord = noise_coord + ivec2(i, j);
-                color_sum += texelFetch(screen, coord, 0);
+                color_sum += texelFetch(scene, coord, 0);
             }
         }
 
@@ -109,13 +109,13 @@ void main()
 
             vec2 unit_vec = normalize(gl_FragCoord.xy - vec2(xpos, ypos));
 
-            FragColor = texelFetch(screen, ivec2(xpos, ypos) + ivec2(scale * length * unit_vec), 0);
+            FragColor = texelFetch(scene, ivec2(xpos, ypos) + ivec2(scale * length * unit_vec), 0);
 
             // FragColor = vec4(1.0, 0.0, 0.0, 1.0);
         }
         else
         {
-            FragColor = texture(screen, TexCoords);
+            FragColor = texture(scene, TexCoords);
         }
     }
     else if (mode == 4) // bloom effect
@@ -129,7 +129,7 @@ void main()
             for (int j = -half_size; j <= half_size; ++j)
             {
                 ivec2 coord = ivec2(gl_FragCoord.xy) + ivec2(i, j);
-                vec4 neighbor = texelFetch(screen, coord, 0);
+                vec4 neighbor = texelFetch(scene, coord, 0);
 
                 float bright = 0.2126 * neighbor.x + 0.7152 * neighbor.y + 0.0722 * neighbor.z;
 
@@ -142,7 +142,7 @@ void main()
                     color_sum += vec4(0);
                 }
 
-                // color_sum += texelFetch(screen, coord, 0);
+                // color_sum += texelFetch(scene, coord, 0);
             }
         }
 
@@ -159,7 +159,7 @@ void main()
             for (int j = -half_size; j <= half_size; ++j)
             {
                 ivec2 coord = ivec2(gl_FragCoord.xy) + ivec2(i, j);
-                vec4 neighbor = texelFetch(screen, coord, 0);
+                vec4 neighbor = texelFetch(scene, coord, 0);
 
                 float bright = 0.2126 * neighbor.x + 0.7152 * neighbor.y + 0.0722 * neighbor.z;
 
@@ -172,7 +172,7 @@ void main()
                     color_sum += vec4(0);
                 }
 
-                // color_sum += texelFetch(screen, coord, 0);
+                // color_sum += texelFetch(scene, coord, 0);
             }
         }
 
@@ -182,7 +182,7 @@ void main()
 
 
 
-        FragColor = 0.25 * blur2 + 0.5 * blur + texture(screen, TexCoords);
+        FragColor = 0.25 * blur2 + 0.5 * blur + texture(scene, TexCoords);
     }
     else if (mode == 5) // pixelization
     {
@@ -200,7 +200,7 @@ void main()
             for (int j = 0; j < pixel_wide; j++)
             {
                 ivec2 coord = ivec2(pixel_x, pixel_y) + ivec2(i, j);
-                color_sum += texelFetch(screen, coord, 0);
+                color_sum += texelFetch(scene, coord, 0);
             }
         }
 
@@ -211,6 +211,6 @@ void main()
     }
     else if (mode == 6) // sin wave
     {
-        FragColor = texture(screen, vec2(TexCoords.x + 0.05 * sin(TexCoords.y * 2 * 3.1416 + time), TexCoords.y));
+        FragColor = texture(scene, vec2(TexCoords.x + 0.05 * sin(TexCoords.y * 2 * 3.1416 + time), TexCoords.y));
     }
 }

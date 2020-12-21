@@ -12,5 +12,10 @@ C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(158,23):
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(159,27): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(160,27): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(317,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(341,42): warning C4101: 'gColorSpec': 未參考的區域變數
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(458,24): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(459,24): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(460,24): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(463,26): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(464,26): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(465,26): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
   LearnOpenGL.vcxproj -> C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\x64\Debug\LearnOpenGL.exe
