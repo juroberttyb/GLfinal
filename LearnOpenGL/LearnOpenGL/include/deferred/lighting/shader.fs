@@ -31,7 +31,7 @@ void main()
         // diffuse
         vec3 lightDir = normalize(lights[i].Position - FragPos);
         vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Albedo * lights[i].Color;
-        lighting += diffuse;
+        lighting += diffuse / 2.0;
     }
     
     FragColor = vec4(lighting, 1.0);
