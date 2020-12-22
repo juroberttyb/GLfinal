@@ -471,9 +471,9 @@ public:
     }
     defer;
 
+    float scaling = 0.01f;
     Render()
     {
-        float scaling = 0.01f;
         mat4 model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
         city.model = model;
 
@@ -486,7 +486,6 @@ public:
     void DrawToScene(_window* window)
     {
         defer.gbuffer.ToScene();
-            float scaling = 0.01;
             defer.gbuffer.draw(window, oak.loader, scale(mat4(1.0f), vec3(scaling, scaling, scaling)));
         defer.gbuffer.EndScene();
 
@@ -494,7 +493,6 @@ public:
             dp.draw(city.loader.vao, city.loader.vnum, city.model);
             for (int i = 0; i < oak.loader->meshes.size(); i++)
                 dp.draw(oak.loader->meshes[i].VAO, oak.loader->meshes[i].vertices.size(), oak.model);
-
         dp.EndScene();
 
         ToScene();
