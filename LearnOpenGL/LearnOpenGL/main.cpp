@@ -328,97 +328,106 @@ public:
     }
 };
 
-class Gbuffer : public pipeline
-{
-public:
-    unsigned int gBuffer;
-    unsigned int gPosition, gNormal, gColorSpec, gAlbedoSpec;
-
-    Gbuffer()
-    {
-        program = new ShaderProgram("include/deferred/gbuffer/shader.vs", "include/deferred/gbuffer/shader.fs");
-        gbuffer();
-    };
-    void gbuffer()
-    {
-        glGenFramebuffers(1, &gBuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-
-        // - position color buffer
-        glGenTextures(1, &gPosition);
-        glBindTexture(GL_TEXTURE_2D, gPosition);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, default_w, default_h, 0, GL_RGBA, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
-
-        // - normal color buffer
-        glGenTextures(1, &gNormal);
-        glBindTexture(GL_TEXTURE_2D, gNormal);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, default_w, default_h, 0, GL_RGBA, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
-
-        // - color + specular color buffer
-        glGenTextures(1, &gAlbedoSpec);
-        glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, default_w, default_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
-
-        // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
-        unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-        glDrawBuffers(3, attachments);
-
-        unsigned int rbo;
-        // use render buffer for depth and stencil since we are not going to sample from them (read them), this will be faster than texture
-        glGenRenderbuffers(1, &rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, default_w, default_h);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
-
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    }
-    void draw_to_scene(_window *window, ModelLoader *_loader, mat4 model)
-    {
-        glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-
-        // glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        glViewport(0, 0, default_w, default_h);
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glEnable(GL_DEPTH_TEST);
-
-        program->SetUniformMat("model", model);
-        program->SetUniformMat("view", window->view);
-        program->SetUniformMat("projection", window->project);
-        _loader->Draw(program->id);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
-};
 class Defer : public pipeline
 {
 public:
+    class Gbuffer : public pipeline
+    {
+    public:
+        unsigned int gBuffer;
+        unsigned int gPosition, gNormal, gColorSpec, gAlbedoSpec;
+
+        Gbuffer()
+        {
+            program = new ShaderProgram("include/deferred/gbuffer/shader.vs", "include/deferred/gbuffer/shader.fs");
+            gbuffer();
+        };
+        void gbuffer()
+        {
+            glGenFramebuffers(1, &gBuffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
+            // - position color buffer
+            glGenTextures(1, &gPosition);
+            glBindTexture(GL_TEXTURE_2D, gPosition);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, default_w, default_h, 0, GL_RGBA, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+
+            // - normal color buffer
+            glGenTextures(1, &gNormal);
+            glBindTexture(GL_TEXTURE_2D, gNormal);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, default_w, default_h, 0, GL_RGBA, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+
+            // - color + specular color buffer
+            glGenTextures(1, &gAlbedoSpec);
+            glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, default_w, default_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+
+            // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+            unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+            glDrawBuffers(3, attachments);
+
+            unsigned int rbo;
+            // use render buffer for depth and stencil since we are not going to sample from them (read them), this will be faster than texture
+            glGenRenderbuffers(1, &rbo);
+            glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, default_w, default_h);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+                cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        }
+        void draw(_window* window, ModelLoader* _loader, mat4 model)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
+            // glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glViewport(0, 0, default_w, default_h);
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glEnable(GL_DEPTH_TEST);
+
+            program->SetUniformMat("model", model);
+            program->SetUniformMat("view", window->view);
+            program->SetUniformMat("projection", window->project);
+            _loader->Draw(program->id);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+    } 
+    gbuffer;
+
     unsigned int vao, vnum;
     std::vector<glm::vec3> lightPositions;
     std::vector<glm::vec3> lightColors;
 
+    Frame position, normal, albedo, spec;
+
     Defer()
+        :
+        gbuffer{ Gbuffer() },
+        position{ Frame(gbuffer.gPosition, string("include/PostEffect/shader.vs"), string("include/PostEffect/shader.fs")) },
+        normal{ Frame(gbuffer.gNormal, string("include/PostEffect/shader.vs"), string("include/PostEffect/shader.fs")) },
+        albedo{ Frame(gbuffer.gAlbedoSpec, string("include/PostEffect/color/shader.vs"), string("include/PostEffect/color/shader.fs")) },
+        spec{ Frame(gbuffer.gAlbedoSpec, string("include/PostEffect/specular/shader.vs"), string("include/PostEffect/specular/shader.fs")) }
     {
         program = new ShaderProgram("include/deferred/lighting/shader.vs", "include/deferred/lighting/shader.fs");
         VAO();
         light_pos();
     }
-
     void VAO()
     {
         const float quad[] = {
@@ -447,7 +456,6 @@ public:
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     }
-
     void light_pos()
     {
         const unsigned int NR_LIGHTS = 32;
@@ -466,12 +474,18 @@ public:
             lightColors.push_back(glm::vec3(rColor, gColor, bColor));
         }
     }
-
-    void draw(_window *window, Gbuffer *gbuffer)
+    void draw_single_buffer(_window* window)
     {
-        program->BindTexture("gPosition", GL_TEXTURE0, gbuffer->gPosition);
-        program->BindTexture("gNormal", GL_TEXTURE1, gbuffer->gNormal);
-        program->BindTexture("gAlbedoSpec", GL_TEXTURE2, gbuffer->gAlbedoSpec);
+        // position.draw(&window);
+        // normal.draw(&window);
+        // albedo.draw(&window);
+        // spec.draw(&window);
+    }
+    void draw(_window *window)
+    {
+        program->BindTexture("gPosition", GL_TEXTURE0, gbuffer.gPosition);
+        program->BindTexture("gNormal", GL_TEXTURE1, gbuffer.gNormal);
+        program->BindTexture("gAlbedoSpec", GL_TEXTURE2, gbuffer.gAlbedoSpec);
 
         program->SetUniformVec3("viewPos", window->camera.pos);
 
@@ -501,23 +515,12 @@ void gloop()
 {
     _window window(default_w, default_h);
     ModelLoader oak = ModelLoader("obj/oak/white_oak.obj");
-    Gbuffer gbuffer;
-    Frame position(gbuffer.gPosition, string("include/PostEffect/shader.vs"), string("include/PostEffect/shader.fs")),
-        normal(gbuffer.gNormal, string("include/PostEffect/shader.vs"), string("include/PostEffect/shader.fs")),
-        albedo(gbuffer.gAlbedoSpec, string("include/PostEffect/color/shader.vs"), string("include/PostEffect/color/shader.fs")),
-        spec(gbuffer.gAlbedoSpec, string("include/PostEffect/specular/shader.vs"), string("include/PostEffect/specular/shader.fs"));
     Defer defer;
 
     while (window.update())
     {
-        gbuffer.draw_to_scene(&window, &oak, scale(mat4(1.0f), vec3(0.1, 0.1, 0.1)));
-
-        // position.draw(&window);
-        // normal.draw(&window);
-        // albedo.draw(&window);
-        // spec.draw(&window);
-
-        defer.draw(&window, &gbuffer);
+        defer.gbuffer.draw(&window, &oak, scale(mat4(1.0f), vec3(0.1, 0.1, 0.1)));
+        defer.draw(&window);
     }
 }
 
