@@ -26,7 +26,6 @@ public:
     {
 
     }
-
     void processInput()
     {
         Window::processInput();
@@ -294,7 +293,7 @@ public:
         public:
             unsigned int gBuffer;
             unsigned int gPosition, gNormal, gColorSpec, gAlbedoSpec;
-            vec3 TranslateVector;
+            vec3 TranslateVector = vec3(0.0, 0.0, -18.0);
 
             Gbuffer()
             {
@@ -312,6 +311,8 @@ public:
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, default_w, default_h, 0, GL_RGBA, GL_FLOAT, NULL);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
 
                 // - normal color buffer
@@ -479,10 +480,7 @@ public:
 
         model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
         oak.model = model;
-
-        defer.gbuffer.TranslateVector = vec3(0.0, 0.0, -18.0);
     }
-
     void DrawToScene(_window* window)
     {
         defer.gbuffer.ToScene();
@@ -504,6 +502,228 @@ public:
     }
 };
 
+class SSAO : public pipeline
+{
+public:
+    class Gbuffer : public pipeline
+    {
+    public:
+        unsigned int gBuffer;
+        unsigned int gPosition, gNormal, gColorSpec, gAlbedoSpec;
+        vec3 TranslateVector = vec3(0.0, 0.0, 0.0); // vec3(0.0, 0.0, -18.0);
+
+        Gbuffer()
+        {
+            program = new ShaderProgram("include/SSAO/gbuffer/shader.vs", "include/SSAO/gbuffer/shader.fs");
+            gbuffer();
+        };
+        void gbuffer()
+        {
+            glGenFramebuffers(1, &gBuffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
+            // - position color buffer
+            glGenTextures(1, &gPosition);
+            glBindTexture(GL_TEXTURE_2D, gPosition);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, default_w, default_h, 0, GL_RGBA, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+
+            // - normal color buffer
+            glGenTextures(1, &gNormal);
+            glBindTexture(GL_TEXTURE_2D, gNormal);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, default_w, default_h, 0, GL_RGBA, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+
+            // - color + specular color buffer
+            glGenTextures(1, &gAlbedoSpec);
+            glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, default_w, default_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+
+            // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+            unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+            glDrawBuffers(3, attachments);
+
+            unsigned int rbo;
+            // use render buffer for depth and stencil since we are not going to sample from them (read them), this will be faster than texture
+            glGenRenderbuffers(1, &rbo);
+            glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, default_w, default_h);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+                cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        }
+        void ToScene()
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
+            // glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glViewport(0, 0, default_w, default_h);
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glEnable(GL_DEPTH_TEST);
+        }
+        void draw(_window* window, ModelLoader* _loader, mat4 model)
+        {
+            program->SetUniformMat("model", translate(mat4(1.0f), TranslateVector) * model);
+            program->SetUniformMat("view", window->view);
+            program->SetUniformMat("projection", window->project);
+            _loader->Draw(program->id);
+        }
+        void EndScene()
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+    }
+    gbuffer;
+
+    unsigned int vao, vnum, noiseTexture;
+    vector<vec3> ssaoKernel;
+    unsigned int ssaoFBO, ssaoColorBuffer;
+
+    SSAO()
+        :
+        gbuffer{ Gbuffer() }
+    {
+        program = new ShaderProgram("include/SSAO/ssao/shader.vs", "include/SSAO/ssao/shader.fs");
+        VAO();
+        SSAOfbo();
+        RamdonVec();
+        kernel();
+    }
+    float lerp(float a, float b, float f)
+    {
+        return a + f * (b - a);
+    }
+    void SSAOfbo()
+    {
+        glGenFramebuffers(1, &ssaoFBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+
+        glGenTextures(1, &ssaoColorBuffer);
+        glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, default_w, default_h, 0, GL_RED, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBuffer, 0);
+    }
+    void RamdonVec()
+    {
+        std::vector<glm::vec3> ssaoNoise;
+        for (unsigned int i = 0; i < 16; i++)
+        {
+            glm::vec3 noise(
+                ((rand() % 100) / 100.0) * 2.0 - 1.0,
+                ((rand() % 100) / 100.0) * 2.0 - 1.0,
+                0.0f);
+            ssaoNoise.push_back(noise);
+        }
+
+        glGenTextures(1, &noiseTexture);
+        glBindTexture(GL_TEXTURE_2D, noiseTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
+    void kernel()
+    {
+        for (unsigned int i = 0; i < 64; ++i)
+        {
+            glm::vec3 sample(
+                ((rand() % 100) / 100.0) * 2.0 - 1.0,
+                ((rand() % 100) / 100.0) * 2.0 - 1.0,
+                ((rand() % 100) / 100.0)
+            );
+            sample = glm::normalize(sample);
+            sample *= ((rand() % 100) / 100.0);
+
+            float scale = (float)i / 64.0;
+            scale = lerp(0.1f, 1.0f, scale * scale);
+            sample *= scale;
+
+            ssaoKernel.push_back(sample);
+        }
+    }
+    void VAO()
+    {
+        const float quad[] = {
+            // positions   // texCoords
+            1.0f,  -1.0f,  1.0f, 0.0f,
+            -1.0f, -1.0f,  0.0f, 0.0f,
+             1.0f, 1.0f,  1.0f, 1.0f,
+
+            1.0f,  1.0f,  1.0f, 1.0f,
+             -1.0f, 1.0f,  0.0f, 1.0f,
+             -1.0f, -1.0f, 0.0f, 0.0f
+        };
+
+        vnum = sizeof(quad) / sizeof(float) / 4;
+
+        // setup plane VAO
+        glGenVertexArrays(1, &vao);
+
+        unsigned int quadVBO;
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quad), &quad, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    }
+    void ToScene()
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glViewport(0, 0, default_w, default_h);
+    }
+    void EndScene()
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+    void draw_to_scene(_window* window) // , unsigned int fbo
+    {
+        ToScene();
+
+        program->BindTexture("gPosition", GL_TEXTURE0, gbuffer.gPosition);
+        program->BindTexture("gNormal", GL_TEXTURE1, gbuffer.gNormal);
+        program->BindTexture("texNoise", GL_TEXTURE2, noiseTexture);
+
+        for (unsigned int i = 0; i < ssaoKernel.size(); i++)
+        {
+            program->SetUniformVec3((string("samples[") + to_string(i) + string("]")).c_str(), ssaoKernel[i]);
+        }
+
+        program->SetUniformMat("projection", window->project);
+
+        program->SetUniformInt("width", window->w);
+        program->SetUniformInt("height", window->h);
+
+        pipeline::draw(vao, vnum);
+
+        EndScene();
+    }
+};
+
 void loop()
 {
     _window window(default_w, default_h);
@@ -517,9 +737,28 @@ void loop()
     }
 }
 
+void sloop()
+{
+    _window window(default_w, default_h);
+    ModelLoader oak("obj/oak/white_oak.obj");
+    SSAO ssao;
+    Frame render(ssao.ssaoColorBuffer, string("include/SSAO/lighting/shader.vs"), string("include/SSAO/lighting/shader.fs"));
+
+    while (window.update())
+    {
+        ssao.gbuffer.ToScene();
+        ssao.gbuffer.draw(&window, &oak, scale(mat4(1.0f), vec3(0.01f, 0.01f, 0.01f)));
+        ssao.gbuffer.EndScene();
+
+        ssao.draw_to_scene(&window);
+
+        render.draw(&window);
+    }
+}
+
 int main()
 {
     loop();
-    // gloop();
+    // sloop();
     return 0;
 }
