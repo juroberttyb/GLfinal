@@ -130,7 +130,7 @@ public:
 
         DepthMap()
         {
-            program = new ShaderProgram("include/shadow/shadow.vs", "include/shadow/shadow.fs");
+            program = new ShaderProgram("include/depthmap/shadow.vs", "include/depthmap/shadow.fs");
 
             glGenFramebuffers(1, &fbo);
             glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -590,6 +590,40 @@ public:
         }
     }
     gbuffer;
+    class Blur : public FrameBufferObject
+    {
+    public:
+        Blur()
+            : FrameBufferObject(default_w, default_h, "include/SSAO/blur/shader.vs", "include/SSAO/blur/shader.fs")
+        {
+            glGenFramebuffers(1, &fbo);
+            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+            glGenTextures(1, &scene);
+            glBindTexture(GL_TEXTURE_2D, scene);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, scene, 0);
+        }
+        void draw(unsigned int fromScene)
+        {
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+
+            glViewport(0, 0, w, h);
+            glDisable(GL_DEPTH_TEST);
+
+            program->BindTexture("scene", GL_TEXTURE0, fromScene);
+            glBindVertexArray(vao);
+            glUseProgram(program->id);
+            glDrawArrays(GL_TRIANGLES, 0, vnum);
+            program->BindTexture("scene", GL_TEXTURE0, 0);
+
+            glEnable(GL_DEPTH_TEST);
+
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        }
+    }
+    blur;
 
     unsigned int vao, vnum, noiseTexture;
     vector<vec3> ssaoKernel;
@@ -597,7 +631,8 @@ public:
 
     SSAO()
         :
-        gbuffer{ Gbuffer() }
+        gbuffer{ Gbuffer() },
+        blur()
     {
         program = new ShaderProgram("include/SSAO/ssao/shader.vs", "include/SSAO/ssao/shader.fs");
         VAO();
@@ -700,7 +735,7 @@ public:
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-    void draw_to_scene(_window* window) // , unsigned int fbo
+    void draw_scene(_window* window) // , unsigned int fbo
     {
         ToScene();
 
@@ -721,6 +756,8 @@ public:
         pipeline::draw(vao, vnum);
 
         EndScene();
+
+        blur.draw(ssaoColorBuffer);
     }
 };
 
@@ -742,7 +779,7 @@ void sloop()
     _window window(default_w, default_h);
     ModelLoader oak("obj/oak/white_oak.obj");
     SSAO ssao;
-    Frame render(ssao.ssaoColorBuffer, string("include/SSAO/lighting/shader.vs"), string("include/SSAO/lighting/shader.fs"));
+    Frame render(ssao.blur.scene, string("include/SSAO/lighting/shader.vs"), string("include/SSAO/lighting/shader.fs"));
 
     while (window.update())
     {
@@ -750,7 +787,7 @@ void sloop()
         ssao.gbuffer.draw(&window, &oak, scale(mat4(1.0f), vec3(0.01f, 0.01f, 0.01f)));
         ssao.gbuffer.EndScene();
 
-        ssao.draw_to_scene(&window);
+        ssao.draw_scene(&window);
 
         render.draw(&window);
     }
@@ -758,7 +795,7 @@ void sloop()
 
 int main()
 {
-    loop();
-    // sloop();
+    // loop();
+    sloop();
     return 0;
 }
