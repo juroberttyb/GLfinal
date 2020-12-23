@@ -23,6 +23,7 @@ uniform float specular_power = 200.0;
 uniform int NormalOn;
 
 uniform sampler2D shadowMap;	
+// uniform sampler2D ssao;
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
@@ -67,7 +68,7 @@ void main()
     vec3 H = normalize(L + V);                                                
                                                                                    
     // Compute the diffuse and specular components for each fragment    
-    vec3 ambient = 0.1 * texture(texture_diffuse1, fs_in.texcoord).rgb;
+    vec3 ambient = 0.3 * texture(texture_diffuse1, fs_in.texcoord).rgb; // * texture(ssao, fs_in.texcoord).r
     vec3 diffuse = max(dot(N, L), 0.0) * texture(texture_diffuse1, fs_in.texcoord).rgb;  
     vec3 specular = pow(max(dot(N, H), 0.0), specular_power) * texture(texture_specular1, fs_in.texcoord).rgb;
 

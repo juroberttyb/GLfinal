@@ -7,17 +7,19 @@ in VS_OUT
     vec3 N;                                            
     vec3 L;                                            
     vec3 V;  
+    vec2 texcoord;
     vec4 FragPosLightSpace;
 } fs_in;      
 
 uniform samplerCube skybox;
 
-// Material properties                                                        
+// Material properties        
 uniform vec3 diffuse_albedo = vec3(0.35);                            
 uniform vec3 specular_albedo = vec3(0.7);                                     
 uniform float specular_power = 200.0; 
 
 uniform sampler2D shadowMap;	
+// uniform sampler2D ssao;
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
@@ -44,7 +46,7 @@ void main()
     vec3 H = normalize(L + V);                                                
                                                                                    
     // Compute the diffuse and specular components for each fragment  
-    vec3 ambient = 0.1 * diffuse_albedo;
+    vec3 ambient = 0.3 * diffuse_albedo; // texture(ssao, fs_in.texcoord).r * 
     vec3 diffuse = max(dot(N, L), 0.0) * diffuse_albedo;  
     vec3 specular = pow(max(dot(N, H), 0.0), specular_power) * specular_albedo;
 

@@ -3,6 +3,7 @@ out vec4 FragColor;
   
 in vec2 TexCoords;
 uniform sampler2D scene;
+uniform sampler2D ssao;
 
 uniform int PostEffect;
 
@@ -21,7 +22,7 @@ void main()
 { 
     if (PostEffect == 0)
     {
-        FragColor = texture(scene, TexCoords);
+        FragColor = texture(scene, TexCoords) * texture(ssao, TexCoords).r;
     }
     else if (PostEffect == 1) // bloom effect
     {
@@ -89,7 +90,7 @@ void main()
 
         FragColor = 0.25 * blur2 + 0.5 * blur + texture(scene, TexCoords);
     }
-    else if (PostEffect == 2)
+    else if (PostEffect == 2) // sigmoid transform
     {
         vec3 value = texture(scene, TexCoords).rgb;
   
@@ -99,4 +100,5 @@ void main()
     
         FragColor = vec4(value, 1.0);
     }
+    // guassian blur to be implemented
 }
