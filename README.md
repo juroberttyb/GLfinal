@@ -1,6 +1,7 @@
 # GLfinal
 
-可更動範圍: main.cpp, shader code <br/>
+可更動code <br/>
+main.cpp, shader code <br/>
 
 控制 <br/>
 WASD: 移動 <br/>
