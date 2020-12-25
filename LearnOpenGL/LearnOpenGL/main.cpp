@@ -1,7 +1,7 @@
 #include "include/includer.h"
 
 int default_w = 1440, default_h = 900;
-unsigned int SSAOtextureID = 0;
+unsigned int SSAOtextureID = 0, RampTextureID = 0;
 
 struct Light
 {
@@ -185,19 +185,19 @@ public:
     public:
         mat4 model = mat4(1.0f);
 
-        Assimp_obj(const char *path)
+        Assimp_obj(const char *path, string vs = "include/AssimpShader/shader.vs", string fs = "include/AssimpShader/shader.fs")
         {
-            program = new ShaderProgram("include/AssimpShader/shader.vs", "include/AssimpShader/shader.fs");
+            program = new ShaderProgram(vs.c_str(), fs.c_str());
             loader = new ModelLoader(path);
         }
-        void draw(_window* window) // , unsigned int SSAO_Scene
+        void draw(_window* window)
         {
             program->SetUniformVec3("light_pos", light.pos);
             
             program->SetUniformInt("NormalOn", window->NormalOn);
 
             program->BindTexture("shadowMap", GL_TEXTURE5, shadow.map);
-            // program->BindTexture("ssao", GL_TEXTURE6, SSAO_Scene);
+            program->BindTexture1D("cel", GL_TEXTURE6, RampTextureID);
 
             program->SetUniformMat("model", model);
             program->SetUniformMat("view", window->view);
@@ -207,7 +207,8 @@ public:
             loader->Draw(program->id);
         }
     }
-    oak = Assimp_obj("obj/oak/white_oak.obj");
+    oak = Assimp_obj("obj/oak/white_oak.obj"),
+    cel_shaded_oak = Assimp_obj("obj/oak/white_oak.obj", "include/cel/shader.vs", "include/cel/shader.fs");
     class Tiny_obj : public pipeline
     {
     public:
@@ -219,7 +220,7 @@ public:
         {
             program = new ShaderProgram("include/TinyobjShader/shader.vs", "include/TinyobjShader/shader.fs");
         }
-        void draw(_window* window, unsigned int cubemapid) // , unsigned int SSAO_Scene
+        void draw(_window* window, unsigned int cubemapid)
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapid);
@@ -227,7 +228,6 @@ public:
             program->SetUniformVec3("light_pos", light.pos);
 
             program->BindTexture("shadowMap", GL_TEXTURE5, shadow.map);
-            // program->BindTexture("ssao", GL_TEXTURE6, SSAO_Scene);
 
             program->SetUniformMat("view", window->view);
             program->SetUniformMat("project", window->project);
@@ -750,8 +750,34 @@ public:
 
         model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
         oak.model = model;
+        cel_shaded_oak.model = translate(mat4(1.0f), vec3(0.0, 0.0, -9.0)) * model;
 
         SSAOtextureID = ssao.blur.scene;
+        RampTextureID = RampTexture();
+    }
+    unsigned int RampTexture()
+    {
+        unsigned int textureID;
+
+        GLubyte toon_tex_data[] =
+        {
+            0x00, 0x11, 0x00, 0x00,
+        0x00, 0x33, 0x00, 0x00, // RGBA(0.25, 0.0, 0.0, 0.0)
+            0x00, 0x55, 0x00, 0x00,
+        0x00, 0x77, 0x00, 0x00, // RGBA(0.5, 0.0, 0.0, 0.0)
+            0x00, 0x99, 0x00, 0x00,
+        0x00, 0xBB, 0x00, 0x00, // RGBA(0.75, 0.0, 0.0, 0.0)
+            0x00, 0xDD, 0x00, 0x00,
+        0x00, 0xFF, 0x00, 0x00 // RGBA(1.0, 0.0, 0.0, 0.0)
+        };
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_1D, textureID);
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, sizeof(toon_tex_data) / 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, toon_tex_data);
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
+        return textureID;
     }
     void DrawToScene(_window* window)
     {
@@ -775,6 +801,7 @@ public:
             sky.draw(window);
             city.draw(window, sky.textureID);
             oak.draw(window);
+            cel_shaded_oak.draw(window);
         EndScene();
     }
 };

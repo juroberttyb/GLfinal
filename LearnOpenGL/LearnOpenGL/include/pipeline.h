@@ -182,6 +182,20 @@ public:
         glActiveTexture(GL_TEXTURE0);
     }
 
+    void BindTexture1D(const char* UniformName, unsigned int TextureUnit, unsigned int texture)
+    {
+        unsigned int SamplerID = TextureUnit - GL_TEXTURE0;
+
+        // tell OpenGL to which texture unit each shader sampler belongs to by setting each sampler using glUniform1i
+        glUseProgram(id); // don't forget to activate the shader before setting uniforms!  
+        glUniform1i(glGetUniformLocation(id, UniformName), SamplerID); // Using glUniform1i we can actually assign a location value to the texture sampler so we can set multiple textures at once
+        glUseProgram(0);
+
+        glActiveTexture(TextureUnit);
+        glBindTexture(GL_TEXTURE_1D, texture);
+        glActiveTexture(GL_TEXTURE0);
+    }
+
     void SetUniformMat(const char* name, glm::mat4 value)
     {
         glUseProgram(id); // use program so that we can change uniform value
