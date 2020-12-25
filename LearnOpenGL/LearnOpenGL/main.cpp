@@ -789,6 +789,8 @@ public:
             dp.draw(city.loader->vao, city.loader->vnum, city.model);
             for (int i = 0; i < oak.loader->meshes.size(); i++)
                 dp.draw(oak.loader->meshes[i].VAO, oak.loader->meshes[i].vertices.size(), oak.model);
+            for (int i = 0; i < cel_shaded_oak.loader->meshes.size(); i++)
+                dp.draw(cel_shaded_oak.loader->meshes[i].VAO, cel_shaded_oak.loader->meshes[i].vertices.size(), cel_shaded_oak.model);
         dp.EndScene();
 
         ssao.gbuffer.ToScene();
