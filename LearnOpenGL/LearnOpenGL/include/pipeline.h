@@ -167,21 +167,6 @@ public:
         glBindTexture(GL_TEXTURE_2D, 0);
         TextureList.push_back(textureID);
     }
-
-    void BindTexture(const char* UniformName, unsigned int TextureUnit, unsigned int texture)
-    {
-        unsigned int SamplerID = TextureUnit - GL_TEXTURE0;
-
-        // tell OpenGL to which texture unit each shader sampler belongs to by setting each sampler using glUniform1i
-        glUseProgram(id); // don't forget to activate the shader before setting uniforms!  
-        glUniform1i(glGetUniformLocation(id, UniformName), SamplerID); // Using glUniform1i we can actually assign a location value to the texture sampler so we can set multiple textures at once
-        glUseProgram(0);
-
-        glActiveTexture(TextureUnit);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glActiveTexture(GL_TEXTURE0);
-    }
-
     void BindTexture1D(const char* UniformName, unsigned int TextureUnit, unsigned int texture)
     {
         unsigned int SamplerID = TextureUnit - GL_TEXTURE0;
@@ -195,7 +180,19 @@ public:
         glBindTexture(GL_TEXTURE_1D, texture);
         glActiveTexture(GL_TEXTURE0);
     }
+    void BindTexture2D(const char* UniformName, unsigned int TextureUnit, unsigned int texture)
+    {
+        unsigned int SamplerID = TextureUnit - GL_TEXTURE0;
 
+        // tell OpenGL to which texture unit each shader sampler belongs to by setting each sampler using glUniform1i
+        glUseProgram(id); // don't forget to activate the shader before setting uniforms!  
+        glUniform1i(glGetUniformLocation(id, UniformName), SamplerID); // Using glUniform1i we can actually assign a location value to the texture sampler so we can set multiple textures at once
+        glUseProgram(0);
+
+        glActiveTexture(TextureUnit);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE0);
+    }
     void SetUniformMat(const char* name, glm::mat4 value)
     {
         glUseProgram(id); // use program so that we can change uniform value
@@ -203,7 +200,6 @@ public:
         glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
         glUseProgram(0);
     }
-
     void SetUniformInt(const char* name, int value)
     {
         glUseProgram(id); // use program so that we can change uniform value
@@ -211,7 +207,6 @@ public:
         glUniform1i(location, value);
         glUseProgram(0);
     }
-
     void SetUniformFloat(const char* name, float value)
     {
         glUseProgram(id); // use program so that we can change uniform value
@@ -219,7 +214,6 @@ public:
         glUniform1f(location, value);
         glUseProgram(0);
     }
-
     void SetUniformVec3(const char* name, glm::vec3 value)
     {
         glUseProgram(id); // use program so that we can change uniform value
@@ -250,7 +244,6 @@ private:
             cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << endl;
         }
     }
-
     void clean(unsigned int vertex, unsigned int fragment)
     {
         // delete the shaders as they're linked into our program now and no longer necessary
@@ -801,11 +794,11 @@ public:
         glViewport(0, 0, w, h);
         glDisable(GL_DEPTH_TEST);
 
-        program->BindTexture("scene", GL_TEXTURE0, scene);
+        program->BindTexture2D("scene", GL_TEXTURE0, scene);
         glBindVertexArray(vao);
         glUseProgram(program->id);
         glDrawArrays(GL_TRIANGLES, 0, vnum);
-        program->BindTexture("scene", GL_TEXTURE0, 0);
+        program->BindTexture2D("scene", GL_TEXTURE0, 0);
 
         glEnable(GL_DEPTH_TEST);
     }
