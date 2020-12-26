@@ -208,7 +208,8 @@ public:
         }
     }
     oak = Assimp_obj("obj/oak/white_oak.obj"),
-    cel_shaded_oak = Assimp_obj("obj/oak/white_oak.obj", "include/cel/shader.vs", "include/cel/shader.fs");
+    cel_shaded_oak = Assimp_obj("obj/oak/white_oak.obj", "include/cel/shader.vs", "include/cel/shader.fs"),
+    pine = Assimp_obj("obj/pine/scrubPine.obj", "obj/pine/shader.vs", "obj/pine/shader.fs");
     class Tiny_obj : public pipeline
     {
     public:
@@ -869,14 +870,30 @@ public:
     terrain;
 
     float scaling = 0.01f;
+
+    static const int num_of_pine = 11;
+    vec3 pine_offset[num_of_pine] = { 
+         vec3(-18.0, -5.0, -13.0),
+         vec3(23.0, -20.0, 35.0),
+         vec3(-42.0, -5.0, -15.0),
+         vec3(-32.0, -5.0, 26.0),
+         vec3(15.0, -5.0, -16.0),
+         vec3(36.0, -8.0, -37.0),
+         vec3(-27.0, -5.0, -48.0),
+         vec3(-48.0, -5.0, 35.0),
+         vec3(35.0, -8.0, -48.0),
+         vec3(2.0, -5.0, -39.0),
+         vec3(-18.0, -15.0, 53.0)};
+
     Render()
     {
-        mat4 model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
+        mat4 model = scale(mat4(1.0f), vec3(scaling));
         city.model = model;
 
-        model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
+        model = scale(mat4(1.0f), vec3(scaling));
         oak.model = model;
         cel_shaded_oak.model = translate(mat4(1.0f), vec3(0.0, 0.0, -9.0)) * model;
+        pine.model = translate(mat4(1.0f), vec3(-18.0, -5.0, -9.0)) * model;
 
         // model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
         terrain.model = translate(mat4(1.0f), vec3(-180.0, -16.0, -180.0)) * terrain.model;
@@ -934,6 +951,12 @@ public:
             oak.draw(window);
             cel_shaded_oak.draw(window);
             terrain.draw(window);
+
+            for (int i = 0; i < num_of_pine; i++)
+            {
+                pine.model = translate(mat4(1.0f), pine_offset[i]) * scale(mat4(1.0f), vec3(scaling));
+                pine.draw(window);
+            }
         EndScene();
     }
 };
@@ -1275,7 +1298,7 @@ void TerrainLoop()
             }
             */
 
-            float scale = 4;
+            float scale = 8;
             for (int i = 0; i < w; i++)
             {
                 for (int j = 0; j < h; j++)

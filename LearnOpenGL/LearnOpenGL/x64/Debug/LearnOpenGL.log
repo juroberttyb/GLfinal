@@ -11,29 +11,29 @@ C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(157,23):
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(158,23): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(159,27): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(160,27): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(435,28): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(436,28): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(437,28): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(672,29): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(790,31): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(438,28): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(673,29): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(791,31): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
           with
           [
               T=float
           ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(790,49): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(791,49): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
           with
           [
               T=float
           ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(920,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(922,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1151,29): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1285,31): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(937,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(939,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1174,29): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1308,31): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
           with
           [
               T=float
           ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1285,49): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
+C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1308,49): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
           with
           [
               T=float
