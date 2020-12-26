@@ -741,6 +741,132 @@ public:
         }
     }
     ssao;
+    class Terrain : public pipeline
+    {
+    public:
+        int vnum;
+        unsigned int vao, hmap, tex;
+        mat4 model = mat4(1.0f);
+
+        Terrain()
+        {
+            program = new ShaderProgram("include/terrain/shader.vs", "include/terrain/shader.fs");
+            VAO();
+            hmap = TextureFromFile("include/terrain/heightmap.jpg");
+            tex = TextureFromFile("include/terrain/texture.jpg");
+        }
+
+        void VAO()
+        {
+            vec2 pos[6];
+            pos[0].x = 0; pos[0].y = 0;
+            pos[1].x = 1; pos[1].y = 0;
+            pos[2].x = 1; pos[2].y = 1;
+            pos[3].x = 1; pos[3].y = 1;
+            pos[4].x = 0; pos[4].y = 1;
+            pos[5].x = 0; pos[5].y = 0;
+
+            const int w = 64, h = 64;
+            float data[w][h][6][4];
+            // int map[w + 1][h + 1];
+
+            /*
+            for (int i = 0; i <= w; i++)
+            {
+                for (int j = 0; j <= h; j++)
+                {
+                    map[i][j] = rand() % 4;
+                }
+            }
+            */
+
+            float scale = 8;
+            for (int i = 0; i < w; i++)
+            {
+                for (int j = 0; j < h; j++)
+                {
+                    for (int k = 0; k < 6; k++)
+                    {
+                        int x = i + pos[k].x, y = j + pos[k].y;
+
+                        data[i][j][k][0] = x * scale;
+                        // data[i][j][k][1] = map[x][y];
+                        data[i][j][k][1] = y * scale;
+                        data[i][j][k][2] = float(x) / float(w);
+                        data[i][j][k][3] = float(y) / float(h);
+                        // cout << float(i + pos[k].x) / float(w) << " " << float(j + pos[k].y) / float(h) << endl;
+                    }
+                }
+            }
+
+            vnum = sizeof(data) / sizeof(float) / 4;
+
+            glGenVertexArrays(1, &vao);
+            glBindVertexArray(vao);
+
+            unsigned int vbo;
+            glGenBuffers(1, &vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(data), &data, GL_STATIC_DRAW);
+
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+        }
+        unsigned int TextureFromFile(const string filename, bool flip = false)
+        {
+            cout << filename << endl;
+
+            unsigned int textureID;
+            glGenTextures(1, &textureID);
+
+            int w, h, nrComponents;
+            stbi_set_flip_vertically_on_load(flip);
+            unsigned char* data = stbi_load(filename.c_str(), &w, &h, &nrComponents, 0);
+            if (data)
+            {
+                GLenum format;
+                if (nrComponents == 1)
+                    format = GL_RED;
+                else if (nrComponents == 3)
+                    format = GL_RGB;
+                else if (nrComponents == 4)
+                    format = GL_RGBA;
+                else
+                    cout << "format not initialized" << endl;
+
+                glBindTexture(GL_TEXTURE_2D, textureID);
+                glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
+                glGenerateMipmap(GL_TEXTURE_2D);
+
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+                stbi_image_free(data);
+            }
+            else
+            {
+                cout << "Texture failed to load at path: " << filename << endl;
+                stbi_image_free(data);
+            }
+
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            return textureID;
+        }
+        void draw(_window* window)
+        {
+            program->SetUniformMat("mvp", window->project * window->view * model);
+            program->BindTexture2D("hamp", GL_TEXTURE0, hmap);
+            program->BindTexture2D("tex", GL_TEXTURE1, tex);
+
+            pipeline::draw(vao, vnum);
+        }
+    }
+    terrain;
 
     float scaling = 0.01f;
     Render()
@@ -751,6 +877,9 @@ public:
         model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
         oak.model = model;
         cel_shaded_oak.model = translate(mat4(1.0f), vec3(0.0, 0.0, -9.0)) * model;
+
+        // model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
+        terrain.model = translate(mat4(1.0f), vec3(-180.0, -16.0, -180.0)) * terrain.model;
 
         SSAOtextureID = ssao.blur.scene;
         RampTextureID = RampTexture();
@@ -804,133 +933,8 @@ public:
             city.draw(window, sky.textureID);
             oak.draw(window);
             cel_shaded_oak.draw(window);
+            terrain.draw(window);
         EndScene();
-    }
-};
-
-class Terrain : public pipeline
-{
-public:
-    int vnum;
-    unsigned int vao, hmap, tex;
-    mat4 model = mat4(1.0f);
-
-    Terrain()
-    {
-        program = new ShaderProgram("include/terrain/shader.vs", "include/terrain/shader.fs");
-        VAO();
-        hmap = TextureFromFile("include/terrain/heightmap.png");
-        tex = TextureFromFile("include/terrain/brickwall.jpg");
-    }
-
-    void VAO()
-    {
-        vec2 pos[6];
-        pos[0].x = 0; pos[0].y = 0;
-        pos[1].x = 1; pos[1].y = 0;
-        pos[2].x = 1; pos[2].y = 1;
-        pos[3].x = 1; pos[3].y = 1;
-        pos[4].x = 0; pos[4].y = 1;
-        pos[5].x = 0; pos[5].y = 0;
-
-        const int w = 64, h = 64;
-        float data[w][h][6][4];
-        // int map[w + 1][h + 1];
-
-        /*
-        for (int i = 0; i <= w; i++)
-        {
-            for (int j = 0; j <= h; j++)
-            {
-                map[i][j] = rand() % 4;
-            }
-        }
-        */
-
-        float scale = 4;
-        for (int i = 0; i < w; i++)
-        {
-            for (int j = 0; j < h; j++)
-            {
-                for (int k = 0; k < 6; k++)
-                {
-                    int x = i + pos[k].x, y = j + pos[k].y;
-
-                    data[i][j][k][0] = x * scale;
-                    // data[i][j][k][1] = map[x][y];
-                    data[i][j][k][1] = y * scale;
-                    data[i][j][k][2] = float(x) / float(w);
-                    data[i][j][k][3] = float(y) / float(h);
-                    // cout << float(i + pos[k].x) / float(w) << " " << float(j + pos[k].y) / float(h) << endl;
-                }
-            }
-        }
-
-        vnum = sizeof(data) / sizeof(float) / 4;
-
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-
-        unsigned int vbo;
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(data), &data, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-    }
-    unsigned int TextureFromFile(const string filename, bool flip = false)
-    {
-        cout << filename << endl;
-
-        unsigned int textureID;
-        glGenTextures(1, &textureID);
-
-        int w, h, nrComponents;
-        stbi_set_flip_vertically_on_load(flip);
-        unsigned char* data = stbi_load(filename.c_str(), &w, &h, &nrComponents, 0);
-        if (data)
-        {
-            GLenum format;
-            if (nrComponents == 1)
-                format = GL_RED;
-            else if (nrComponents == 3)
-                format = GL_RGB;
-            else if (nrComponents == 4)
-                format = GL_RGBA;
-            else
-                cout << "format not initialized" << endl;
-
-            glBindTexture(GL_TEXTURE_2D, textureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            stbi_image_free(data);
-        }
-        else
-        {
-            cout << "Texture failed to load at path: " << filename << endl;
-            stbi_image_free(data);
-        }
-
-        glBindTexture(GL_TEXTURE_2D, 0);
-        
-        return textureID;
-    }
-    void draw(_window *window)
-    {
-        program->SetUniformMat("mvp", window->project * window->view * model);
-        program->BindTexture2D("hamp", GL_TEXTURE0, hmap);
-        program->BindTexture2D("tex", GL_TEXTURE1, tex);
-
-        pipeline::draw(vao, vnum);
     }
 };
 
@@ -1232,7 +1236,131 @@ void SSAOloop()
 void TerrainLoop()
 {
     _window window(default_w, default_h);
-    Terrain terrain;
+    class Terrain : public pipeline
+    {
+    public:
+        int vnum;
+        unsigned int vao, hmap, tex;
+        mat4 model = mat4(1.0f);
+
+        Terrain()
+        {
+            program = new ShaderProgram("include/terrain/shader.vs", "include/terrain/shader.fs");
+            VAO();
+            hmap = TextureFromFile("include/terrain/heightmap.jpg");
+            tex = TextureFromFile("include/terrain/texture.jpg");
+        }
+
+        void VAO()
+        {
+            vec2 pos[6];
+            pos[0].x = 0; pos[0].y = 0;
+            pos[1].x = 1; pos[1].y = 0;
+            pos[2].x = 1; pos[2].y = 1;
+            pos[3].x = 1; pos[3].y = 1;
+            pos[4].x = 0; pos[4].y = 1;
+            pos[5].x = 0; pos[5].y = 0;
+
+            const int w = 64, h = 64;
+            float data[w][h][6][4];
+            // int map[w + 1][h + 1];
+
+            /*
+            for (int i = 0; i <= w; i++)
+            {
+                for (int j = 0; j <= h; j++)
+                {
+                    map[i][j] = rand() % 4;
+                }
+            }
+            */
+
+            float scale = 4;
+            for (int i = 0; i < w; i++)
+            {
+                for (int j = 0; j < h; j++)
+                {
+                    for (int k = 0; k < 6; k++)
+                    {
+                        int x = i + pos[k].x, y = j + pos[k].y;
+
+                        data[i][j][k][0] = x * scale;
+                        // data[i][j][k][1] = map[x][y];
+                        data[i][j][k][1] = y * scale;
+                        data[i][j][k][2] = float(x) / float(w);
+                        data[i][j][k][3] = float(y) / float(h);
+                        // cout << float(i + pos[k].x) / float(w) << " " << float(j + pos[k].y) / float(h) << endl;
+                    }
+                }
+            }
+
+            vnum = sizeof(data) / sizeof(float) / 4;
+
+            glGenVertexArrays(1, &vao);
+            glBindVertexArray(vao);
+
+            unsigned int vbo;
+            glGenBuffers(1, &vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(data), &data, GL_STATIC_DRAW);
+
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+        }
+        unsigned int TextureFromFile(const string filename, bool flip = false)
+        {
+            cout << filename << endl;
+
+            unsigned int textureID;
+            glGenTextures(1, &textureID);
+
+            int w, h, nrComponents;
+            stbi_set_flip_vertically_on_load(flip);
+            unsigned char* data = stbi_load(filename.c_str(), &w, &h, &nrComponents, 0);
+            if (data)
+            {
+                GLenum format;
+                if (nrComponents == 1)
+                    format = GL_RED;
+                else if (nrComponents == 3)
+                    format = GL_RGB;
+                else if (nrComponents == 4)
+                    format = GL_RGBA;
+                else
+                    cout << "format not initialized" << endl;
+
+                glBindTexture(GL_TEXTURE_2D, textureID);
+                glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
+                glGenerateMipmap(GL_TEXTURE_2D);
+
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+                stbi_image_free(data);
+            }
+            else
+            {
+                cout << "Texture failed to load at path: " << filename << endl;
+                stbi_image_free(data);
+            }
+
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            return textureID;
+        }
+        void draw(_window* window)
+        {
+            program->SetUniformMat("mvp", window->project * window->view * model);
+            program->BindTexture2D("hamp", GL_TEXTURE0, hmap);
+            program->BindTexture2D("tex", GL_TEXTURE1, tex);
+
+            pipeline::draw(vao, vnum);
+        }
+    } terrain;
 
     while (window.update())
     {
@@ -1244,6 +1372,6 @@ int main()
 {
     loop();
     // SSAOloop(); // for demo SSAO
-    // TerrainLoop();
+    // TerrainLoop(); // for demo terrain
     return 0;
 }
