@@ -255,57 +255,6 @@ public:
         }
     } 
     city = Tiny_obj("obj/metro_city/Metro city.obj");
-    class Quad : public pipeline
-    {
-    public:
-        unsigned int vao, vnum;
-        glm::mat4 model = mat4(1.0f);
-
-        Quad()
-        {
-            program = new ShaderProgram("obj/quad/shader.vs", "obj/quad/shader.fs");
-
-            CubeLoad();
-        }
-        void CubeLoad()
-        {
-            float vertices[] = {
-                    1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 0.0f,
-                    1.0f,  0.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
-                    -1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 0.0f,
-                    -1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 0.0f,
-                    -1.0f,  0.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
-                    1.0f,  0.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
-            };
-
-            vnum = sizeof(vertices) / sizeof(float) / 6;
-
-            glGenVertexArrays(1, &vao);
-            glBindVertexArray(vao);
-
-            unsigned int VBO;
-            glGenBuffers(1, &VBO);
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-            glEnableVertexAttribArray(1);
-
-            glBindVertexArray(0);
-        }
-        void draw(_window* window)
-        {
-            program->SetUniformMat("model", model);
-            program->SetUniformMat("view", window->view);
-            program->SetUniformMat("project", window->project);
-
-            pipeline::draw(vao, vnum);
-        }
-    } 
-    quad;
     class Defer : public pipeline
     {
     public:
