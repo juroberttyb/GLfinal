@@ -43,7 +43,7 @@ public:
 
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !Fpress)
         {
-            post_effect = (post_effect + 1) % 3;
+            post_effect = (post_effect + 1) % 4;
             Fpress = true;
         }
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)

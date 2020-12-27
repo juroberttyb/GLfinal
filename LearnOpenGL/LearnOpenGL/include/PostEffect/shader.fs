@@ -24,7 +24,38 @@ void main()
     {
         FragColor = texture(scene, TexCoords) * texture(ssao, TexCoords).r;
     }
-    else if (PostEffect == 1) // bloom effect
+    else if (PostEffect == 2) // sigmoid transform
+    {
+        vec3 value = texture(scene, TexCoords).rgb;
+  
+        float s =  sigmoid(value);
+
+        value = s * value;
+    
+        FragColor = vec4(value, 1.0);
+    }
+    else if (PostEffect == 1) // guassian blur
+    {
+        int half_size = 2;
+        vec4 color_sum = vec4(0);
+
+        for (int i = -half_size; i <= half_size; ++i)
+        {
+            for (int j = -half_size; j <= half_size; ++j)
+            {
+                ivec2 coord = ivec2(gl_FragCoord.xy) + ivec2(i, j);
+                vec4 neighbor = texelFetch(scene, coord, 0);
+
+                color_sum += neighbor;
+            }
+        }
+
+        int sample_count = (half_size * 2 + 1) * (half_size * 2 + 1);
+        vec4 blur = color_sum / sample_count;
+
+        FragColor = blur;
+    }
+    else if (PostEffect == 3) // bloom effect
     {
         int half_size = 2;
         vec4 color_sum = vec4(0);
@@ -90,15 +121,4 @@ void main()
 
         FragColor = 0.25 * blur2 + 0.5 * blur + texture(scene, TexCoords);
     }
-    else if (PostEffect == 2) // sigmoid transform
-    {
-        vec3 value = texture(scene, TexCoords).rgb;
-  
-        float s =  sigmoid(value);
-
-        value = s * value;
-    
-        FragColor = vec4(value, 1.0);
-    }
-    // guassian blur to be implemented
 }
