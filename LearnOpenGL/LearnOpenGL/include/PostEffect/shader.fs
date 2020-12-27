@@ -6,6 +6,7 @@ uniform sampler2D scene;
 uniform sampler2D ssao;
 
 uniform int PostEffect;
+uniform float exposure;
 
 float sigmoid(vec3 v)
 {
@@ -24,17 +25,19 @@ void main()
     {
         FragColor = texture(scene, TexCoords) * texture(ssao, TexCoords).r;
     }
-    else if (PostEffect == 2) // sigmoid transform
+    else if (PostEffect == 1) // hdr
     {
-        vec3 value = texture(scene, TexCoords).rgb;
+        const float gamma = 2.2;
+        vec3 hdrColor = texture(scene, TexCoords).rgb;
   
-        float s =  sigmoid(value);
-
-        value = s * value;
-    
-        FragColor = vec4(value, 1.0);
+        // exposure tone mapping
+        vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
+        // gamma correction 
+        mapped = pow(mapped, vec3(1.0 / gamma));
+  
+        FragColor = vec4(mapped, 1.0);
     }
-    else if (PostEffect == 1) // guassian blur
+    else if (PostEffect == 2) // guassian blur
     {
         int half_size = 2;
         vec4 color_sum = vec4(0);
@@ -55,7 +58,17 @@ void main()
 
         FragColor = blur;
     }
-    else if (PostEffect == 3) // bloom effect
+    else if (PostEffect == 3) // sigmoid transform
+    {
+        vec3 value = texture(scene, TexCoords).rgb;
+  
+        float s =  sigmoid(value);
+
+        value = s * value;
+    
+        FragColor = vec4(value, 1.0);
+    }
+    else if (PostEffect == 4) // bloom effect
     {
         int half_size = 2;
         vec4 color_sum = vec4(0);

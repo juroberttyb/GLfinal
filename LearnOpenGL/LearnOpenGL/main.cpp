@@ -5,7 +5,7 @@ unsigned int SSAOtextureID = 0, RampTextureID = 0;
 
 struct Light
 {
-    vec3 pos = vec3(0.0, 10.0, -10.0);
+    vec3 pos = vec3(0.0, 15.0, -15.0);
     vec3 center = vec3(0.0, 0.0, 0.0);
     vec3 up = vec3(0.0, 1.0, 0.0);
 } light;
@@ -19,8 +19,9 @@ struct ShadowProj
 class _window : public Window
 {
 public:
-    bool Ipress = false, Fpress = false, Npress = false;
-    int mode = 0, post_effect = 0, NormalOn = 1;
+    bool Ipress = false, Fpress = false, Npress = false, Hpress = false;
+    int mode = 0, post_effect = 0, NormalOn = 1, HDRon = 1;
+    float exposure = 0.1;
 
     _window(int w, int h)
         : Window(w, h)
@@ -43,7 +44,7 @@ public:
 
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !Fpress)
         {
-            post_effect = (post_effect + 1) % 4;
+            post_effect = (post_effect + 1) % 5;
             Fpress = true;
         }
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)
@@ -51,23 +52,36 @@ public:
             Fpress = false;
         }
 
-        if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !Npress)
+        if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS && !Npress)
         {
             NormalOn = (NormalOn + 1) % 2;
             Npress = true;
         }
-        if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE)
+        if (glfwGetKey(window, GLFW_KEY_N) == GLFW_RELEASE)
         {
             Npress = false;
         }
 
-        if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         {
             light.pos = rotate(mat4(1.0f), 0.1f, vec3(0.0, 1.0, 0.0)) * vec4(light.pos, 1.0f);
         }
-        if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         {
             light.pos = rotate(mat4(1.0f), -0.1f, vec3(0.0, 1.0, 0.0)) * vec4(light.pos, 1.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        {
+            exposure += 0.1;
+        }
+        if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+        {
+            exposure -= 0.1;
+            if (exposure < 0)
+            {
+                exposure = 0;
+            }
         }
     }
     bool update()
@@ -97,6 +111,8 @@ public:
     void draw(_window* window)
     {
         program->SetUniformInt("PostEffect", window->post_effect);
+        program->SetUniformInt("HDRon", window->HDRon);
+        program->SetUniformFloat("exposure", window->exposure);
         program->BindTexture2D("ssao", GL_TEXTURE1, SSAOtextureID);
         FrameBufferObject::draw();
     }
@@ -298,7 +314,7 @@ public:
         public:
             unsigned int gBuffer;
             unsigned int gPosition, gNormal, gColorSpec, gAlbedoSpec;
-            vec3 TranslateVector = vec3(0.0, 0.0, -18.0);
+            vec3 TranslateVector = vec3(0.0, 0.0, -9.0);
 
             Gbuffer()
             {
@@ -892,7 +908,7 @@ public:
 
         model = scale(mat4(1.0f), vec3(scaling));
         oak.model = model;
-        cel_shaded_oak.model = translate(mat4(1.0f), vec3(0.0, 0.0, -9.0)) * model;
+        cel_shaded_oak.model = translate(mat4(1.0f), vec3(0.0, 0.0, -18.0)) * model;
         pine.model = translate(mat4(1.0f), vec3(-18.0, -5.0, -9.0)) * model;
 
         // model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
@@ -900,6 +916,40 @@ public:
 
         SSAOtextureID = ssao.blur.scene;
         RampTextureID = RampTexture();
+
+        HDR_FBO();
+    }
+    void HDR_FBO()
+    {
+        glGenFramebuffers(1, &fbo);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+
+        // use texture for color buffer since we are going to sample from them (read them)
+        glGenTextures(1, &scene);
+        glActiveTexture(GL_TEXTURE0);
+
+        glBindTexture(GL_TEXTURE_2D, scene);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, scene, 0);
+
+        // use render buffer for depth and stencil since we are not going to sample from them (read them), this will be faster than texture
+        glGenRenderbuffers(1, &rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
     unsigned int RampTexture()
     {
