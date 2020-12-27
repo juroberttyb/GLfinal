@@ -26,7 +26,6 @@ public:
     _window(int w, int h)
         : Window(w, h)
     {
-
     }
     void processInput()
     {
@@ -851,6 +850,7 @@ public:
          vec3(-18.0, -15.0, 53.0)};
 
     Render()
+        : Frame(string("include/PostEffect/shader.vs"), string("include/PostEffect/shader.fs"))
     {
         mat4 model = scale(mat4(1.0f), vec3(scaling));
         city.model = model;
@@ -878,7 +878,7 @@ public:
         glActiveTexture(GL_TEXTURE0);
 
         glBindTexture(GL_TEXTURE_2D, scene);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -924,7 +924,7 @@ public:
 
         return textureID;
     }
-    void DrawToScene(_window* window)
+    void DrawScene(_window* window)
     {
         defer.gbuffer.ToScene();
             defer.gbuffer.draw(window, oak.loader, oak.model);
@@ -958,18 +958,21 @@ public:
             }
         EndScene();
     }
+    void draw(_window *window)
+    {
+        DrawScene(window);
+        Frame::draw(window);
+    }
 };
 
 void loop()
 {
     _window window(default_w, default_h);
     Render render;
-    Frame PostEffect(render.scene, string("include/PostEffect/shader.vs"), string("include/PostEffect/shader.fs"));
 
     while (window.update())
     {
-        render.DrawToScene(&window);
-        PostEffect.draw(&window);
+        render.draw(&window);
     }
 }
 void SSAOloop()
