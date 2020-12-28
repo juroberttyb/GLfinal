@@ -6,7 +6,14 @@ uniform sampler2D scene;
 uniform sampler2D ssao;
 
 uniform int PostEffect;
+uniform int hdr;
 uniform float exposure;
+
+uniform float weight[25] = float[] (1.0 / 273.0, 4.0 / 273.0, 7.0 / 273.0, 4.0 / 273.0, 1.0 / 273.0,
+                                    4.0 / 273.0, 16.0 / 273.0, 26.0 / 273.0, 16.0 / 273.0, 4.0 / 273.0,
+                                    7.0 / 273.0, 26.0 / 273.0, 41.0 / 273.0, 26.0 / 273.0, 7.0 / 273.0,
+                                    4.0 / 273.0, 16.0 / 273.0, 26.0 / 273.0, 16.0 / 273.0, 4.0 / 273.0,
+                                    1.0 / 273.0, 4.0 / 273.0, 7.0 / 273.0, 4.0 / 273.0, 1.0 / 273.0);
 
 float sigmoid(vec3 v)
 {
@@ -21,21 +28,33 @@ float sigmoid(vec3 v)
 
 void main()
 { 
-    if (PostEffect == 0)
+    vec4 temp = texture(scene, TexCoords);
+
+    if (PostEffect == 0) // bloom effect
     {
-        FragColor = texture(scene, TexCoords) * texture(ssao, TexCoords).r;
+        vec2 tex_offset = 1.0 / textureSize(scene, 0); // gets size of single texel
+        vec3 result = texture(scene, TexCoords).rgb; // texture(scene, TexCoords).rgb * weight[0]; // current fragment's contribution
+        float threshold = 1.0;
+
+        for(int i = -2; i <= 2; ++i)
+        {
+            for(int j = -2; j <= 2; j++)
+            {
+                vec3 neib = texture(scene, TexCoords + vec2(tex_offset.x * i, tex_offset.y * j)).rgb;
+                float bright = 0.2126 * neib.r + 0.7152 * neib.g + 0.0722 * neib.b;
+
+                if (bright > threshold)
+                {
+                    result += neib * weight[(i + 2) * 5 + j + 2];
+                }
+            }
+        }
+
+        temp = vec4(result, 1.0);
     }
-    else if (PostEffect == 1) // hdr
+    else if (PostEffect == 1) // original
     {
-        const float gamma = 2.2;
-        vec3 hdrColor = texture(scene, TexCoords).rgb;
-  
-        // exposure tone mapping
-        vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
-        // gamma correction 
-        mapped = pow(mapped, vec3(1.0 / gamma));
-  
-        FragColor = vec4(mapped, 1.0);
+
     }
     else if (PostEffect == 2) // guassian blur
     {
@@ -56,7 +75,7 @@ void main()
         int sample_count = (half_size * 2 + 1) * (half_size * 2 + 1);
         vec4 blur = color_sum / sample_count;
 
-        FragColor = blur;
+        temp = blur;
     }
     else if (PostEffect == 3) // sigmoid transform
     {
@@ -66,72 +85,22 @@ void main()
 
         value = s * value;
     
-        FragColor = vec4(value, 1.0);
+        temp = vec4(value, 1.0);
     }
-    else if (PostEffect == 4) // bloom effect
+
+    // hdr
+    if (hdr == 1)
     {
-        int half_size = 2;
-        vec4 color_sum = vec4(0);
-        float threshold = 0.5;
-
-        for (int i = -half_size; i <= half_size; ++i)
-        {
-            for (int j = -half_size; j <= half_size; ++j)
-            {
-                ivec2 coord = ivec2(gl_FragCoord.xy) + ivec2(i, j);
-                vec4 neighbor = texelFetch(scene, coord, 0);
-
-                float bright = 0.2126 * neighbor.x + 0.7152 * neighbor.y + 0.0722 * neighbor.z;
-
-                if (bright >= threshold)
-                {
-                    color_sum += neighbor;
-                }
-                else
-                {
-                    color_sum += vec4(0);
-                }
-
-                // color_sum += texelFetch(scene, coord, 0);
-            }
-        }
-
-        int sample_count = (half_size * 2 + 1) * (half_size * 2 + 1);
-        vec4 blur = color_sum / sample_count;
-
-
-
-        half_size = 4;
-        color_sum = vec4(0);
-
-        for (int i = -half_size; i <= half_size; ++i)
-        {
-            for (int j = -half_size; j <= half_size; ++j)
-            {
-                ivec2 coord = ivec2(gl_FragCoord.xy) + ivec2(i, j);
-                vec4 neighbor = texelFetch(scene, coord, 0);
-
-                float bright = 0.2126 * neighbor.x + 0.7152 * neighbor.y + 0.0722 * neighbor.z;
-
-                if (bright >= threshold)
-                {
-                    color_sum += neighbor;
-                }
-                else
-                {
-                    color_sum += vec4(0);
-                }
-
-                // color_sum += texelFetch(scene, coord, 0);
-            }
-        }
-
-        sample_count = (half_size * 2 + 1) * (half_size * 2 + 1);
-        vec4 blur2 = color_sum / sample_count;
-
-
-
-
-        FragColor = 0.25 * blur2 + 0.5 * blur + texture(scene, TexCoords);
+        const float gamma = 2.2;
+        vec3 hdrColor = temp.rgb;
+  
+        // exposure tone mapping
+        vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
+        // gamma correction 
+        mapped = pow(mapped, vec3(1.0 / gamma));
+  
+        temp = vec4(mapped, 1.0);
     }
+
+    FragColor = temp * texture(ssao, TexCoords).r;
 }

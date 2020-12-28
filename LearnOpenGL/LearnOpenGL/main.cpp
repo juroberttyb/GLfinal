@@ -21,7 +21,7 @@ class _window : public Window
 public:
     bool Ipress = false, Fpress = false, Npress = false, Hpress = false;
     int mode = 0, post_effect = 0, NormalOn = 1, HDRon = 1;
-    float exposure = 0.1;
+    float exposure = 1.0;
 
     _window(int w, int h)
         : Window(w, h)
@@ -43,7 +43,7 @@ public:
 
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !Fpress)
         {
-            post_effect = (post_effect + 1) % 5;
+            post_effect = (post_effect + 1) % 4;
             Fpress = true;
         }
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)
@@ -61,6 +61,16 @@ public:
             Npress = false;
         }
 
+        if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS && !Hpress)
+        {
+            HDRon = (HDRon + 1) % 2;
+            Hpress = true;
+        }
+        if (glfwGetKey(window, GLFW_KEY_H) == GLFW_RELEASE)
+        {
+            Hpress = false;
+        }
+
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         {
             light.pos = rotate(mat4(1.0f), 0.1f, vec3(0.0, 1.0, 0.0)) * vec4(light.pos, 1.0f);
@@ -72,11 +82,11 @@ public:
 
         if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
         {
-            exposure += 0.1;
+            exposure += 0.01;
         }
         if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
         {
-            exposure -= 0.1;
+            exposure -= 0.01;
             if (exposure < 0)
             {
                 exposure = 0;
@@ -110,7 +120,7 @@ public:
     void draw(_window* window)
     {
         program->SetUniformInt("PostEffect", window->post_effect);
-        program->SetUniformInt("HDRon", window->HDRon);
+        program->SetUniformInt("hdr", window->HDRon);
         program->SetUniformFloat("exposure", window->exposure);
         program->BindTexture2D("ssao", GL_TEXTURE1, SSAOtextureID);
         FrameBufferObject::draw();
