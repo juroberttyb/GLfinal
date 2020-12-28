@@ -6,8 +6,9 @@ main.cpp, shader code <br/>
 控制 <br/>
 WASD: 移動 <br/>
 滾輪: 控制移動速度 <br/>
-F: 切換Post Effect效果 <br/> 
-N: Normal mapping On/Off <br/> 
+F: 切換Post Effect效果 (bloom and hdr activated by default) <br/> 
+N: Normal mapping on/off <br/> 
+H: HDR on/off <br/>
 
 效果 <br/>
 SSAO與Normal mapping在原點, 中點橡樹有效 <br/>
