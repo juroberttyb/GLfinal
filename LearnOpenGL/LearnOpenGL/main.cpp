@@ -234,7 +234,8 @@ public:
     }
     oak = Assimp_obj("obj/oak/white_oak.obj"),
     cel_shaded_oak = Assimp_obj("obj/oak/white_oak.obj", "include/cel/shader.vs", "include/cel/shader.fs"),
-    pine = Assimp_obj("obj/pine/scrubPine.obj", "obj/pine/shader.vs", "obj/pine/shader.fs");
+    pine = Assimp_obj("obj/pine/scrubPine.obj", "obj/pine/shader.vs", "obj/pine/shader.fs"),
+    sun = Assimp_obj("obj/sun/sphere-cylcoords-16k.obj", "obj/sun/shader.vs", "obj/sun/shader.fs");
     class Tiny_obj : public pipeline
     {
     public:
@@ -869,6 +870,7 @@ public:
         oak.model = model;
         cel_shaded_oak.model = translate(mat4(1.0f), vec3(0.0, 0.0, -18.0)) * model;
         pine.model = translate(mat4(1.0f), vec3(-18.0, -5.0, -9.0)) * model;
+        sun.model = translate(mat4(1.0f), vec3(0.0, 15.0, -9.0)) * model;
 
         // model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
         terrain.model = translate(mat4(1.0f), vec3(-180.0, -16.0, -180.0)) * terrain.model;
@@ -960,6 +962,7 @@ public:
             oak.draw(window);
             cel_shaded_oak.draw(window);
             terrain.draw(window);
+            sun.draw(window);
 
             for (int i = 0; i < num_of_pine; i++)
             {
