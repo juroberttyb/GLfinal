@@ -99,6 +99,11 @@ public:
         glfwSwapBuffers(window);
         processInput();
 
+        if (Window::camera.pos.y < -0.25)
+        {
+            Window::camera.pos.y = -0.25;
+        }
+
         bool state = glfwWindowShouldClose(window);
         clear(state);
 

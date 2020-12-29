@@ -20,7 +20,7 @@ public:
         glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        float fov = 80.0f, camera_speed = 2.0f;
+        float fov = 80.0f, camera_speed = 1.0f;
     } camera;
     static struct TrackBall
     {
