@@ -843,6 +843,93 @@ public:
         }
     }
     terrain;
+    class Star : pipeline
+    {
+    public:
+        unsigned int buffer, vao;
+        int NUM_STARS = 512;
+
+        Star()
+        {
+            program = new ShaderProgram("include/partical/shader.vs", "include/partical/shader.fs");
+
+            VAO();
+            program->TextureFromFile("include/partical/star.png");
+        }
+
+        float random_float()
+        {
+            return (rand() % 100) / 100.0;
+        }
+
+        void VAO()
+        {
+            glGenVertexArrays(1, &vao);
+            glBindVertexArray(vao);
+
+            // declare type to represent a star
+            struct star_t {
+                glm::vec3 position;
+                glm::vec3 color;
+            };
+            // create and map a vertex buffer object
+            glGenBuffers(1, &buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, buffer);
+            glBufferData(GL_ARRAY_BUFFER, NUM_STARS * sizeof(star_t),
+                NULL, GL_STATIC_DRAW);
+            star_t* star = (star_t*)glMapBufferRange(
+                GL_ARRAY_BUFFER, 0,
+                NUM_STARS * sizeof(star_t),
+                GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+
+            // fill in star data with random values
+            for (int i = 0; i < NUM_STARS; i++)
+            {
+                star[i].position[0] = (random_float() - 0.5) * 2 * 1500;
+                star[i].position[1] = random_float();
+                star[i].position[2] = (random_float() - 0.5) * 2 * 1500 - 900;
+                star[i].color[0] = 0.8f + random_float() * 0.2f;
+                star[i].color[1] = 0.8f + random_float() * 0.2f;
+                star[i].color[2] = 0.8f + random_float() * 0.2f;
+            }
+            glUnmapBuffer(GL_ARRAY_BUFFER);
+            // setup vertex array states
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(star_t), NULL);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(star_t),
+                (void*)sizeof(glm::vec3));
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(1);
+        }
+
+        void draw(_window* window)
+        {
+            // glUniform1f(time, currentTime);
+            program->SetUniformFloat("time", glfwGetTime() / 64.0);
+            // glUniformMatrix4fv(proj_location, 1, GL_FALSE, &proj_matrix[0][0]);
+            program->SetUniformMat("proj_matrix", window->project * window->view * scale(mat4(1.0f), vec3(0.01)));
+            // glBindTexture(GL_TEXTURE_2D, m_texture);
+            program->BindTexture2D("tex_star", GL_TEXTURE0, program->TextureList[0]);
+            // enable point sprite
+
+            glUseProgram(program->id);
+            glBindVertexArray(vao);
+
+            glEnable(GL_POINT_SPRITE);
+            glEnable(GL_PROGRAM_POINT_SIZE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+
+            glDrawArrays(GL_POINTS, 0, NUM_STARS);
+
+            glDisable(GL_POINT_SPRITE);
+            glDisable(GL_PROGRAM_POINT_SIZE);
+            glDisable(GL_BLEND);
+
+            glBindVertexArray(0);
+            glUseProgram(0);
+        }
+    }
+    star;
 
     float scaling = 0.01f;
 
@@ -963,6 +1050,7 @@ public:
             cel_shaded_oak.draw(window);
             terrain.draw(window);
             sun.draw(window);
+            star.draw(window);
 
             for (int i = 0; i < num_of_pine; i++)
             {
@@ -1405,11 +1493,103 @@ void TerrainLoop()
         terrain.draw(&window);
     }
 }
+void ParticalLoop()
+{
+    _window window(default_w, default_h);
+    class Star : pipeline
+    {
+    public:
+        unsigned int buffer, vao;
+        int NUM_STARS = 256;
+
+        Star()
+        {
+            program = new ShaderProgram("include/partical/shader.vs", "include/partical/shader.fs");
+
+            VAO();
+            program->TextureFromFile("include/partical/star.png");
+        }
+
+        float random_float()
+        {
+            return (rand() % 100) / 100.0;
+        }
+
+        void VAO()
+        {
+            glGenVertexArrays(1, &vao);
+            glBindVertexArray(vao);
+
+            // declare type to represent a star
+            struct star_t {
+                glm::vec3 position;
+                glm::vec3 color;
+            };
+            // create and map a vertex buffer object
+            glGenBuffers(1, &buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, buffer);
+            glBufferData(GL_ARRAY_BUFFER, NUM_STARS * sizeof(star_t),
+                NULL, GL_STATIC_DRAW);
+            star_t* star = (star_t*)glMapBufferRange(
+                GL_ARRAY_BUFFER, 0,
+                NUM_STARS * sizeof(star_t),
+                GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+
+            // fill in star data with random values
+            for (int i = 0; i < NUM_STARS; i++)
+            {
+                star[i].position[0] = (random_float() - 0.5) * 2 * 500;
+                star[i].position[1] = random_float();
+                star[i].position[2] = (random_float() - 0.5) * 2 * 500;
+                star[i].color[0] = 0.8f + random_float() * 0.2f;
+                star[i].color[1] = 0.8f + random_float() * 0.2f;
+                star[i].color[2] = 0.8f + random_float() * 0.2f;
+            }
+            glUnmapBuffer(GL_ARRAY_BUFFER);
+            // setup vertex array states
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(star_t), NULL);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(star_t),
+                (void*)sizeof(glm::vec3));
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(1);
+        }
+
+        void draw(_window *window)
+        {
+            // glUniform1f(time, currentTime);
+            program->SetUniformFloat("time", glfwGetTime() / 64.0);
+            // glUniformMatrix4fv(proj_location, 1, GL_FALSE, &proj_matrix[0][0]);
+            program->SetUniformMat("proj_matrix", window->project * window->view * scale(mat4(1.0f), vec3(0.01)));
+            // glBindTexture(GL_TEXTURE_2D, m_texture);
+            program->BindTexture2D("tex_star", GL_TEXTURE0, program->TextureList[0]);
+            // enable point sprite
+
+            glUseProgram(program->id);
+            glBindVertexArray(vao);
+
+            glEnable(GL_POINT_SPRITE);
+            glEnable(GL_PROGRAM_POINT_SIZE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+            glDrawArrays(GL_POINTS, 0, NUM_STARS);
+
+            glBindVertexArray(0);
+            glUseProgram(0);
+        }
+    }
+    star;
+
+    while (window.update())
+    {
+        star.draw(&window);
+    }
+}
 
 int main()
 {
     loop();
     // SSAOloop(); // for demo SSAO
     // TerrainLoop(); // for demo terrain
+    // ParticalLoop();
     return 0;
 }

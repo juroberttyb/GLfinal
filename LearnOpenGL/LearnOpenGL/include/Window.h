@@ -20,7 +20,7 @@ public:
         glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        float fov = 80.0f, camera_speed = 8.0f;
+        float fov = 80.0f, camera_speed = 2.0f;
     } camera;
     static struct TrackBall
     {
@@ -179,15 +179,19 @@ private:
     }
     static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     {
-        float constant = 0.5f;
+        float constant = 0.1f;
 
         if (yoffset > 0)
         {
             camera.camera_speed += constant;
         }
-        if (yoffset < 0 && camera.camera_speed - constant > 0)
+        if (yoffset < 0)
         {
             camera.camera_speed -= constant;
+            if (camera.camera_speed <= 0)
+            {
+                camera.camera_speed = constant;
+            }
         }
     }
 
