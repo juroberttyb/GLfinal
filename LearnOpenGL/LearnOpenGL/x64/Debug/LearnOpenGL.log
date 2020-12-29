@@ -57,21 +57,4 @@ C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1416,49): warnin
           [
               T=float
           ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1520,35): warning C4244: 'return': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1546,66): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
-          with
-          [
-              T=float
-          ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1548,66): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
-          with
-          [
-              T=float
-          ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1565,60): warning C4244: '引數': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1567,1): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
-          with
-          [
-              T=float
-          ]
   LearnOpenGL.vcxproj -> C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\x64\Debug\LearnOpenGL.exe
