@@ -1,4 +1,5 @@
-﻿  main.cpp
+﻿  glad.c
+  main.cpp
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(550,20): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Texture' 現在已經定義為 'private'，之前它定義為 'public'
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(314): message : 請參閱 'ModelLoader::Texture' 的宣告
 C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(556,16): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Mesh' 現在已經定義為 'private'，之前它定義為 'public'
@@ -57,4 +58,5 @@ C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1416,49): warnin
           [
               T=float
           ]
+LINK : warning LNK4098: 預設的程式庫 'MSVCRT' 與其他使用的程式庫衝突，請使用 /NODEFAULTLIB:library
   LearnOpenGL.vcxproj -> C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\x64\Debug\LearnOpenGL.exe
