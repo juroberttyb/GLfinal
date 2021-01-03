@@ -935,6 +935,29 @@ public:
         }
     }
     star;
+    class Grass : public Tiny_obj
+    {
+    public:
+        Grass()
+            : Tiny_obj("obj/grass/Low Grass.obj")
+        {
+            program = new ShaderProgram("obj/grass/shader.vs", "obj/grass/shader.fs");
+        }
+
+        void draw(_window* window)
+        {
+            program->SetUniformMat("model", model);
+            program->SetUniformMat("view", window->view);
+            program->SetUniformMat("project", window->project);
+
+            glUseProgram(program->id);
+            glBindVertexArray(loader->vao);
+            glDrawArraysInstanced(GL_TRIANGLES, 0, loader->vnum, 81);
+            glBindVertexArray(0);
+            glUseProgram(0);
+        }
+    }
+    grass;
 
     float scaling = 0.01f;
 
@@ -963,6 +986,7 @@ public:
         cel_shaded_oak.model = translate(mat4(1.0f), vec3(0.0, 0.0, -18.0)) * model;
         pine.model = translate(mat4(1.0f), vec3(-18.0, -5.0, -9.0)) * model;
         sun.model = translate(mat4(1.0f), vec3(0.0, 15.0, -9.0)) * model;
+        grass.model = translate(mat4(1.0f), vec3(0.0, -0.32, -9.0)) * model;
 
         // model = scale(mat4(1.0f), vec3(scaling, scaling, scaling));
         terrain.model = translate(mat4(1.0f), vec3(-180.0, -16.0, -180.0)) * terrain.model;
@@ -1056,6 +1080,7 @@ public:
             terrain.draw(window);
             sun.draw(window);
             star.draw(window);
+            grass.draw(window);
 
             for (int i = 0; i < num_of_pine; i++)
             {
@@ -1498,11 +1523,60 @@ void TerrainLoop()
         terrain.draw(&window);
     }
 }
+void GrassLoop()
+{
+    _window window(default_w, default_h);
+    class Tiny_obj : public pipeline
+    {
+    public:
+        TinyOjectLoader* loader;
+        glm::mat4 model = glm::mat4(1.0f);
+
+        Tiny_obj(const char* path)
+            : loader{ new TinyOjectLoader(path) }
+        {
+            program = new ShaderProgram("include/TinyobjShader/shader.vs", "include/TinyobjShader/shader.fs");
+        }
+        void draw(_window* window, unsigned int cubemapid)
+        {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapid);
+
+            program->SetUniformVec3("light_pos", light.pos);
+
+            program->BindTexture2D("shadowMap", GL_TEXTURE5, shadow.map);
+
+            program->SetUniformMat("view", window->view);
+            program->SetUniformMat("project", window->project);
+            program->SetUniformMat("model", model);
+            program->SetUniformMat("lightSpaceMatrix", shadow.vp);
+
+            pipeline::draw(loader->vao, loader->vnum);
+        }
+    }
+    grass = Tiny_obj("obj/grass/Low Grass.obj");
+    grass.program = new ShaderProgram("obj/grass/shader.vs", "obj/grass/shader.fs");
+    grass.model = scale(mat4(1.0f), vec3(0.01f));
+
+    while (window.update())
+    {
+        grass.program->SetUniformMat("model", grass.model);
+        grass.program->SetUniformMat("view", window.view);
+        grass.program->SetUniformMat("project", window.project);
+
+        glUseProgram(grass.program->id);
+        glBindVertexArray(grass.loader->vao);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, grass.loader->vnum, 81);
+        glBindVertexArray(0);
+        glUseProgram(0);
+    }
+}
 
 int main()
 {
     loop();
     // SSAOloop(); // for demo SSAO
     // TerrainLoop(); // for demo terrain
+    // GrassLoop();
     return 0;
 }
