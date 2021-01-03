@@ -848,13 +848,13 @@ public:
         }
     }
     terrain;
-    class Star : pipeline
+    class Snow : pipeline
     {
     public:
         unsigned int buffer, vao;
-        int NUM_STARS = 512;
+        int NUM_STARS = 1024;
 
-        Star()
+        Snow()
         {
             program = new ShaderProgram("include/partical/shader.vs", "include/partical/shader.fs");
 
@@ -934,7 +934,7 @@ public:
             glUseProgram(0);
         }
     }
-    star;
+    snow;
     class Grass : public Tiny_obj
     {
     public:
@@ -1079,7 +1079,7 @@ public:
             cel_shaded_oak.draw(window);
             terrain.draw(window);
             sun.draw(window);
-            star.draw(window);
+            snow.draw(window);
             grass.draw(window);
 
             for (int i = 0; i < num_of_pine; i++)
