@@ -16,3 +16,5 @@ deferred rendering的multi light只在遠點橡樹有效 <br/>
 toon shading在中點橡樹有效 <br/>
 
 進度表: https://docs.google.com/spreadsheets/d/18Z4K4RitCf1YPHfvBUpyMdoYZvHwg00s0Yi5LTxOerE/edit#gid=0 <br/>
+
+架構介紹: https://docs.google.com/document/d/1Qmd9T5klY_o33rXZR9iYzrcn6_OdV-0ZWEkoMNGzs1Q/edit?usp=sharing <br/>
