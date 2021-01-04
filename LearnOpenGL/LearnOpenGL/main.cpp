@@ -1106,6 +1106,186 @@ void loop()
         render.draw(&window);
     }
 }
+void DeferLoop()
+{
+    _window window(default_w, default_h);
+    class Defer : public pipeline
+    {
+    public:
+        class Gbuffer : public pipeline
+        {
+        public:
+            unsigned int gBuffer;
+            unsigned int gPosition, gNormal, gColorSpec, gAlbedoSpec;
+
+            Gbuffer()
+            {
+                program = new ShaderProgram("include/deferred/gbuffer/shader.vs", "include/deferred/gbuffer/shader.fs");
+                gbuffer();
+            };
+            void gbuffer()
+            {
+                glGenFramebuffers(1, &gBuffer);
+                glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
+                // - position color buffer
+                glGenTextures(1, &gPosition);
+                glBindTexture(GL_TEXTURE_2D, gPosition);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, default_w, default_h, 0, GL_RGBA, GL_FLOAT, NULL);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+
+                // - normal color buffer
+                glGenTextures(1, &gNormal);
+                glBindTexture(GL_TEXTURE_2D, gNormal);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, default_w, default_h, 0, GL_RGBA, GL_FLOAT, NULL);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+
+                // - color + specular color buffer
+                glGenTextures(1, &gAlbedoSpec);
+                glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, default_w, default_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+
+                // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+                unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+                glDrawBuffers(3, attachments);
+
+                unsigned int rbo;
+                // use render buffer for depth and stencil since we are not going to sample from them (read them), this will be faster than texture
+                glGenRenderbuffers(1, &rbo);
+                glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+                glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, default_w, default_h);
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+                glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+                if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+                    cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+
+                glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            }
+            void ToScene()
+            {
+                glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
+                // glDrawBuffer(GL_COLOR_ATTACHMENT0);
+                glViewport(0, 0, default_w, default_h);
+
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                glEnable(GL_DEPTH_TEST);
+            }
+            void draw(_window* window, ModelLoader* _loader, mat4 model)
+            {
+                program->SetUniformMat("model", model);
+                program->SetUniformMat("view", window->view);
+                program->SetUniformMat("projection", window->project);
+                _loader->Draw(program->id);
+            }
+            void EndScene()
+            {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+        }
+        gbuffer;
+
+        unsigned int vao, vnum;
+        vector<vec3> lightPositions;
+        vector<vec3> lightColors;
+
+        Frame position, normal, albedo, spec;
+
+        Defer()
+            :
+            gbuffer{ Gbuffer() },
+            position{ Frame(gbuffer.gPosition) },
+            normal{ Frame(gbuffer.gNormal) },
+            albedo{ Frame(gbuffer.gAlbedoSpec, string("include/PostEffect/color/shader.vs"), string("include/PostEffect/color/shader.fs")) },
+            spec{ Frame(gbuffer.gAlbedoSpec, string("include/PostEffect/specular/shader.vs"), string("include/PostEffect/specular/shader.fs")) }
+        {
+            program = new ShaderProgram("include/deferred/lighting/shader.vs", "include/deferred/lighting/shader.fs");
+            VAO();
+        }
+        void VAO()
+        {
+            const float quad[] = {
+                // positions   // texCoords
+                1.0f,  -1.0f,  1.0f, 0.0f,
+                -1.0f, -1.0f,  0.0f, 0.0f,
+                 1.0f, 1.0f,  1.0f, 1.0f,
+
+                1.0f,  1.0f,  1.0f, 1.0f,
+                 -1.0f, 1.0f,  0.0f, 1.0f,
+                 -1.0f, -1.0f, 0.0f, 0.0f
+            };
+
+            vnum = sizeof(quad) / sizeof(float) / 4;
+
+            // setup plane VAO
+            glGenVertexArrays(1, &vao);
+
+            unsigned int quadVBO;
+            glGenBuffers(1, &quadVBO);
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(quad), &quad, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+        }
+        void draw_single_buffer(_window* window)
+        {
+            // position.draw(window);
+            normal.draw(window);
+            // albedo.draw(window);
+            // spec.draw(window);
+        }
+        void draw(_window* window, unsigned int fbo)
+        {
+            program->BindTexture2D("gPosition", GL_TEXTURE0, gbuffer.gPosition);
+            program->BindTexture2D("gNormal", GL_TEXTURE1, gbuffer.gNormal);
+            program->BindTexture2D("gAlbedoSpec", GL_TEXTURE2, gbuffer.gAlbedoSpec);
+
+            program->SetUniformVec3("viewPos", window->camera.pos);
+
+            for (unsigned int i = 0; i < lightPositions.size(); i++)
+            {
+                program->SetUniformVec3((string("lights[") + to_string(i) + string("].Position")).c_str(), lightPositions[i]);
+                program->SetUniformVec3((string("lights[") + to_string(i) + string("].Color")).c_str(), lightColors[i]);
+            }
+
+            pipeline::draw(vao, vnum);
+
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.gBuffer);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo); // write to default framebuffer
+            glBlitFramebuffer(
+                0, 0, default_w, default_h, 0, 0, default_w, default_h, GL_DEPTH_BUFFER_BIT, GL_NEAREST
+            );
+            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        }
+    }
+    defer;
+
+    ModelLoader oak = ModelLoader("obj/oak/white_oak.obj");
+
+    while (window.update())
+    {
+        defer.gbuffer.ToScene();
+            defer.gbuffer.draw(&window, &oak, scale(mat4(1.0f), vec3(0.01f)));
+        defer.gbuffer.EndScene();
+
+        defer.position.draw(&window);
+    }
+}
 void SSAOloop()
 {
     _window window(default_w, default_h);
@@ -1575,6 +1755,7 @@ void GrassLoop()
 int main()
 {
     loop();
+    // DeferLoop(); // for demo Defer
     // SSAOloop(); // for demo SSAO
     // TerrainLoop(); // for demo terrain
     // GrassLoop();
