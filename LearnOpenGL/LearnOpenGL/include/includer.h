@@ -10,10 +10,12 @@
 #include "Window.h"
 #include "pipeline.h"
 #include "tiny_obj_loader.h"
+#include "fbxloader.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
+#include <IL/il.h>
 
 using namespace std;
 using namespace glm;

@@ -1706,7 +1706,134 @@ void TerrainLoop()
 void GrassLoop()
 {
     _window window(default_w, default_h);
-    class Tiny_obj : public pipeline
+	typedef struct
+	{
+		GLuint vao;
+		GLuint vbo;
+		GLuint vboTex;
+		GLuint ebo;
+		int materialId;
+		int indexCount;
+	} Shape;
+
+	typedef struct
+	{
+		GLuint texId;
+	} Material;
+	class FBX_obj : public pipeline
+	{
+	public:
+		class FBXLoader
+		{
+		public:
+			FBXLoader(const char* path)
+			{
+				vector<tinyobj::attrib_t> attribs;
+				vector<tinyobj::shape_t> shapes;
+				vector<tinyobj::material_t> materials;
+
+				string err;
+
+				bool ret = LoadFbx(objectFbx, attribs, shapes, materials, err, path);
+				if (!err.empty()) {
+					cout << err << endl;
+				}
+				if (ret) {
+					// For Each Material
+					/*for (int i = 0; i < materials.size(); i++)
+					{
+						ILuint ilTexName;
+						ilGenImages(1, &ilTexName);
+						ilBindImage(ilTexName);
+						Material mat;
+						if (ilLoadImage(materials[i].diffuse_texname.c_str()))
+						{
+							int width = ilGetInteger(IL_IMAGE_WIDTH);
+							int height = ilGetInteger(IL_IMAGE_HEIGHT);
+							unsigned char *data = new unsigned char[width * height * 4];
+							ilCopyPixels(0, 0, 0, width, height, 1, IL_RGBA, IL_UNSIGNED_BYTE, data);
+
+							glGenTextures(1, &mat.texId);
+							glBindTexture(GL_TEXTURE_2D, mat.texId);
+							glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+							glGenerateMipmap(GL_TEXTURE_2D);
+
+							delete[] data;
+							ilDeleteImages(1, &ilTexName);
+						}
+						objectMaterials.push_back(mat);
+					}*/
+
+					// For Each Shape (or Mesh, Object)
+					for (int i = 0; i < shapes.size(); i++)
+					{
+						Shape shape;
+						glGenVertexArrays(1, &shape.vao);
+						glBindVertexArray(shape.vao);
+
+						glGenBuffers(3, &shape.vbo);
+						glBindBuffer(GL_ARRAY_BUFFER, shape.vbo);
+						//glBufferData(GL_ARRAY_BUFFER, shapes[i].mesh.positions.size() * sizeof(float), shapes[i].mesh.positions.data(), GL_STATIC_DRAW);
+						glBufferData(GL_ARRAY_BUFFER, attribs[i].vertices.size() * sizeof(float), attribs[i].vertices.data(), GL_STATIC_DRAW);
+						glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+						glBindBuffer(GL_ARRAY_BUFFER, shape.vboTex);
+						//glBufferData(GL_ARRAY_BUFFER, shapes[i].mesh.texcoords.size() * sizeof(float), shapes[i].mesh.texcoords.data(), GL_STATIC_DRAW);
+						glBufferData(GL_ARRAY_BUFFER, attribs[i].texcoords.size() * sizeof(float), attribs[i].texcoords.data(), GL_STATIC_DRAW);
+						glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+						glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shape.ebo);
+						glBufferData(GL_ELEMENT_ARRAY_BUFFER, shapes[i].mesh.indices.size() * sizeof(unsigned int), shapes[i].mesh.indices.data(), GL_STATIC_DRAW);
+						shape.materialId = shapes[i].mesh.material_ids[0];
+						shape.indexCount = shapes[i].mesh.indices.size();
+						glEnableVertexAttribArray(0);
+						glEnableVertexAttribArray(1);
+						glBindBuffer(GL_ARRAY_BUFFER, 0);
+						glBindVertexArray(0);
+						objectShapes.push_back(shape);
+					}
+				}
+
+				attribs.clear();
+				attribs.shrink_to_fit();
+				shapes.clear();
+				shapes.shrink_to_fit();
+				materials.clear();
+				materials.shrink_to_fit();
+			}
+
+			vector<Shape> objectShapes;
+			vector<Material> objectMaterials;
+			fbx_handles objectFbx;
+		};
+
+		FBXLoader *loader;
+		glm::mat4 model = glm::mat4(1.0f);
+
+		FBX_obj(const char *path)
+			: loader{ new FBXLoader(path) }
+		{
+			program = new ShaderProgram("include/FBXobjShader/shader.vs", "include/FBXobjShader/shader.fs");
+		}
+		void draw(_window *window)
+		{
+			program->SetUniformVec3("light_pos", light.pos);
+
+			program->BindTexture2D("shadowMap", GL_TEXTURE5, shadow.map);
+
+			program->SetUniformMat("view", window->view);
+			program->SetUniformMat("project", window->project);
+			program->SetUniformMat("model", model);
+			program->SetUniformMat("lightSpaceMatrix", shadow.vp);
+
+			for (int i = 0; i < loader->objectShapes.size(); i++)
+			{
+				pipeline::draw(loader->objectShapes[i].vao, loader->objectShapes[i].indexCount);
+			}
+			//pipeline::draw(loader->vao, loader->vnum);
+		}
+	}
+	grass = FBX_obj("grass.fbx");
+	grass.model = scale(mat4(1.0f), vec3(0.01f));
+    /*class Tiny_obj : public pipeline
     {
     public:
         TinyOjectLoader* loader;
@@ -1736,7 +1863,7 @@ void GrassLoop()
     }
     grass = Tiny_obj("obj/grass/Low Grass.obj");
     grass.program = new ShaderProgram("obj/grass/shader.vs", "obj/grass/shader.fs");
-    grass.model = scale(mat4(1.0f), vec3(0.01f));
+    grass.model = scale(mat4(1.0f), vec3(0.01f));*/
 
     while (window.update())
     {
@@ -1744,20 +1871,21 @@ void GrassLoop()
         grass.program->SetUniformMat("view", window.view);
         grass.program->SetUniformMat("project", window.project);
 
-        glUseProgram(grass.program->id);
+		grass.draw(&window);
+        /*glUseProgram(grass.program->id);
         glBindVertexArray(grass.loader->vao);
         glDrawArraysInstanced(GL_TRIANGLES, 0, grass.loader->vnum, 81);
         glBindVertexArray(0);
-        glUseProgram(0);
+        glUseProgram(0);*/
     }
 }
 
 int main()
 {
-    loop();
+    //loop();
     // DeferLoop(); // for demo Defer
     // SSAOloop(); // for demo SSAO
     // TerrainLoop(); // for demo terrain
-    // GrassLoop();
+    GrassLoop();
     return 0;
 }
