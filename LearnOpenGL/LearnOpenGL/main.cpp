@@ -15,6 +15,11 @@ struct ShadowProj
     mat4 vp;
     unsigned int map;
 } shadow;
+struct Wind
+{
+	vec3 dir = vec3(1.0, 0.0, 1.0);
+	float force = 5.0;
+} wind;
 
 class _window : public Window
 {
@@ -92,6 +97,24 @@ public:
                 exposure = 0;
             }
         }
+
+		if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
+		{
+			wind.force += 0.1;
+		}
+		if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
+		{
+			wind.force -= 0.1;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS)
+		{
+			wind.dir = rotate(mat4(1.0f), 0.1f, vec3(0.0, 1.0, 0.0)) * vec4(wind.dir, 1.0f);
+		}
+		if (glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS)
+		{
+			wind.dir = rotate(mat4(1.0f), 0.1f, vec3(0.0, 1.0, 0.0)) * vec4(wind.dir, 1.0f);
+		}
     }
     bool update()
     {
@@ -950,6 +973,10 @@ public:
             program->SetUniformMat("view", window->view);
             program->SetUniformMat("project", window->project);
 
+			program->SetUniformFloat("time", glfwGetTime() * 60.0f * wind.force / 3.0f);
+			program->SetUniformVec3("wind_dir", wind.dir);
+			program->SetUniformFloat("wind_force", wind.force);
+			
             glUseProgram(program->id);
             glBindVertexArray(loader->vao);
             glDrawArraysInstanced(GL_TRIANGLES, 0, loader->vnum, 81);
