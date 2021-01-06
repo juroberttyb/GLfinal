@@ -1,4 +1,5 @@
-#include "fbxloader.h"
+//#include "fbxloader.h"
+#include "includer.h"
 #include <algorithm>
 
 using namespace std;
@@ -66,7 +67,7 @@ void GetFbxAnimation(fbx_handles &handles, std::vector<tinyobj::attrib_t> &attri
 {
 	if (handles.lScene != 0)
 	{
-		frame = min(max(frame, 0.0f), 1.0f);
+		frame = std::min(std::max(frame, 0.0f), 1.0f);
 		FbxTimeSpan lTimeLineTimeSpan;
 		handles.lScene->GetGlobalSettings().GetTimelineDefaultTimeSpan(lTimeLineTimeSpan);
 		FbxTime lTime = lTimeLineTimeSpan.GetStart() + ((lTimeLineTimeSpan.GetStop() - lTimeLineTimeSpan.GetStart()) / 10000) * (10000 * frame);
