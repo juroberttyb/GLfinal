@@ -992,7 +992,7 @@ public:
 		int vnum;
 		unsigned int waterBufferIn, waterBufferOut;
 		mat4 model = translate(mat4(1.0f), vec3(0.0, -5.0, 0.0));
-		float lastdrop = -5.0;
+		float lastdrop = 0;
 		struct WaterColumn
 		{
 			float height;
@@ -1004,7 +1004,7 @@ public:
 			for (int i = 0; i < 2; i++)
 			{
 				char buffer[60];
-				sprintf(buffer, "obj/water/shader%d.cs", i + 1); // what format do your shader files named with?
+				sprintf(buffer, "obj/water/shader%d.cs", i); // what format do your shader files named with?
 				ShaderProgram *cp = new ShaderProgram(buffer);
 				compute_programs.push_back(cp);
 			}
@@ -1050,6 +1050,7 @@ public:
 			glGenBuffers(1, &ebo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 			glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * 6, indices, GL_DYNAMIC_STORAGE_BIT);
+			AddDrop();
 		}
 
 		void draw(_window* window , unsigned int cubemapid)
