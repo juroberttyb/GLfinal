@@ -1,60 +1,55 @@
 ﻿  main.cpp
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(550,20): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Texture' 現在已經定義為 'private'，之前它定義為 'public'
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(314): message : 請參閱 'ModelLoader::Texture' 的宣告
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(556,16): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Mesh' 現在已經定義為 'private'，之前它定義為 'public'
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(315): message : 請參閱 'ModelLoader::Mesh' 的宣告
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\pipeline.h(617,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLsizei'，資料可能遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(97,35): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(152,31): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(153,31): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(157,23): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(158,23): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(159,27): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\include\Window.h(160,27): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(85,1): warning C4305: '+=': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(89,1): warning C4305: '-=': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(416,28): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(417,28): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(418,28): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(653,29): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(771,31): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\include\pipeline.h(581): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Texture' 現在已經定義為 'private'，之前它定義為 'public'
+  c:\users\user\documents\glfinal\learnopengl\learnopengl\include\pipeline.h(345): note: 請參閱 'ModelLoader::Texture' 的宣告
+c:\users\user\documents\glfinal\learnopengl\learnopengl\include\pipeline.h(587): warning C4240: 使用非標準的擴充: 存取 'ModelLoader::Mesh' 現在已經定義為 'private'，之前它定義為 'public'
+  c:\users\user\documents\glfinal\learnopengl\learnopengl\include\pipeline.h(346): note: 請參閱 'ModelLoader::Mesh' 的宣告
+c:\users\user\documents\glfinal\learnopengl\learnopengl\include\pipeline.h(648): warning C4267: '引數': 將 'size_t' 轉換為 'GLsizei'，資料可能遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\include\window.h(97): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\include\window.h(152): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\include\window.h(153): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\include\window.h(157): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\include\window.h(158): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\include\window.h(159): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\include\window.h(160): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(90): warning C4305: '+=': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(94): warning C4305: '-=': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(103): warning C4305: '+=': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(107): warning C4305: '-=': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(439): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(440): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(441): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(676): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(794): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
           with
           [
               T=float
           ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(771,49): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(890): warning C4244: 'return': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(916): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
           with
           [
               T=float
           ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(867,35): warning C4244: 'return': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(893,66): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(918): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
           with
           [
               T=float
           ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(895,73): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(935): warning C4244: '引數': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(937): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
           with
           [
               T=float
           ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(912,60): warning C4244: '引數': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(914,1): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(976): warning C4244: '引數': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(1057): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(1191): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(1193): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(1615): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+c:\users\user\documents\glfinal\learnopengl\learnopengl\main.cpp(1749): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
           with
           [
               T=float
           ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1064,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1066,1): warning C4267: '引數': 將 'size_t' 轉換為 'GLint'，資料可能遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1487,29): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1621,31): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
-          with
-          [
-              T=float
-          ]
-C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\LearnOpenGL\main.cpp(1621,49): warning C4244: '正在初始化': 將 'T' 轉換為 'int'，由於類型不同，可能導致資料遺失
-          with
-          [
-              T=float
-          ]
-  LearnOpenGL.vcxproj -> C:\Users\jurob\Desktop\GLfinal\LearnOpenGL\x64\Debug\LearnOpenGL.exe
+LINK : warning LNK4098: 預設的程式庫 'MSVCRT' 與其他使用的程式庫衝突，請使用 /NODEFAULTLIB:library
+  LearnOpenGL.vcxproj -> C:\Users\USER\Documents\GLfinal\LearnOpenGL\x64\Debug\LearnOpenGL.exe

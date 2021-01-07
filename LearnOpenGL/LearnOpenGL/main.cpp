@@ -990,7 +990,14 @@ public:
 	public:
 		unsigned int buffer, vao;
 		int vnum;
-
+		unsigned int waterBufferIn, waterBufferOut;
+		mat4 model = translate(mat4(1.0f), vec3(0.0, -5.0, 0.0));
+		float lastdrop = -5.0;
+		struct WaterColumn
+		{
+			float height;
+			float flow;
+		};
 		Water()
 		{
 			program = new ShaderProgram("obj/water/shader.vs", "obj/water/shader.fs");
@@ -1002,33 +1009,77 @@ public:
 				compute_programs.push_back(cp);
 			}
 		}
-
+		void AddDrop()
+		{
+			// Randomly add a "drop" of water into the grid system.
+			glUseProgram(compute_programs[1]->id);
+			glUniform2ui(0, rand() % 180, rand() % 180);
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, waterBufferIn);
+			glDispatchCompute(10, 10, 1);
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		}
 		void VAO()
 		{
 			// generate buffers??
+			glGenBuffers(1, &waterBufferIn);
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, waterBufferIn);
+			// Create initial data.
+			WaterColumn *data = new WaterColumn[32400];
+			for (int x = 0; x < 180; ++x)
+			{
+				for (int y = 0; y < 180; ++y)
+				{
+					int idx = y * 180 + x;
+					data[idx].height = 60.0f;
+					data[idx].flow = 0.0f;
+				}
+			}
+			glBufferStorage(GL_SHADER_STORAGE_BUFFER, sizeof(WaterColumn) * 32400, data, GL_DYNAMIC_STORAGE_BIT);
+			delete[] data;
+
+			glGenBuffers(1, &waterBufferOut);
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, waterBufferOut);
+			glBufferStorage(GL_SHADER_STORAGE_BUFFER, sizeof(WaterColumn) * 32400, NULL, GL_DYNAMIC_STORAGE_BIT);
+
+			glGenVertexArrays(1, &vao);
+			glBindVertexArray(vao);
+
+			// Create an index buffer of 2 triangles, 6 vertices.
+			uint indices[] = { 0, 2, 3, 0, 3, 1 };
+			GLuint ebo;
+			glGenBuffers(1, &ebo);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+			glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * 6, indices, GL_DYNAMIC_STORAGE_BIT);
 		}
 
-		void draw(_window* window)
+		void draw(_window* window , unsigned int cubemapid)
 		{
-			for (int i = 0; i < compute_programs.size(); i++)
-			{
-				// --- maybe need to set view & project?? ---
-				compute_programs[i]->SetUniformMat("view", window->view);
-				compute_programs[i]->SetUniformMat("project", window->project);
-				// --- maybe need to set view & project?? ---
-
-				// set some uniforms??
-
-				// maybe draw with compute program here??
+			float nowtime = glfwGetTime();
+			if (nowtime - lastdrop >= 5.0) {
+				AddDrop();
+				lastdrop = nowtime;
 			}
-			program->SetUniformMat("view", window->view);
-			program->SetUniformMat("project", window->project);
+			glUseProgram(compute_programs[0]->id);
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, waterBufferIn);
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, waterBufferOut);
+			// Each group updates 18 * 18 of the grid. We need 10 * 10 groups in total.
+			glDispatchCompute(10, 10, 1);
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+			//program->SetUniformMat("model", window->model);
+			program->SetUniformMat("mvp", window->project*window->view*model);
+			program->SetUniformVec3("eye", window->camera.pos);
 
 			// set some uniforms??
-
-			glUseProgram(program->id);
 			glBindVertexArray(vao);
-			glDrawArrays(GL_TRIANGLES, 0, vnum);
+			glUseProgram(program->id);
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, waterBufferOut);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapid);
+			// Draw 179 * 179 triangles based on the 180 * 180 water grid.
+			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 179 * 179);
+
+			std::swap(waterBufferIn, waterBufferOut);
 			glBindVertexArray(0);
 			glUseProgram(0);
 		}
@@ -1157,6 +1208,7 @@ public:
             sun.draw(window);
             snow.draw(window);
             grass.draw(window);
+			water.draw(window, sky.textureID);
 
             for (int i = 0; i < num_of_pine; i++)
             {
