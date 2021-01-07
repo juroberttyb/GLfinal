@@ -250,7 +250,7 @@ public:
             program->SetUniformInt("NormalOn", window->NormalOn);
 
             program->BindTexture2D("shadowMap", GL_TEXTURE5, shadow.map);
-            program->BindTexture1D("cel", GL_TEXTURE6, RampTextureID);
+            program->BindTexture1D("ramp", GL_TEXTURE6, RampTextureID);
 
             program->SetUniformMat("model", model);
             program->SetUniformMat("view", window->view);
