@@ -124,6 +124,16 @@ public:
         delete(vertex_shader);
         delete(fragment_shader);
     }
+	ShaderProgram(const char* computePath)
+	{
+		compute_shader = new Shader(computePath, GL_COMPUTE_SHADER);
+
+		// shader Program
+		CreateProgram(compute_shader->id);
+		clean(compute_shader->id);
+
+		delete(compute_shader);
+	}
 
     void TextureFromFile(const string filename, bool flip = false)
     {
@@ -244,12 +254,33 @@ private:
             cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << endl;
         }
     }
+	void CreateProgram(unsigned int compute)
+	{
+		int success;
+		char infoLog[512];
+
+		id = glCreateProgram();
+		glAttachShader(id, compute);
+		glLinkProgram(id);
+		// print linking errors if any
+		glGetProgramiv(id, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			glGetProgramInfoLog(id, 512, NULL, infoLog);
+			cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << endl;
+		}
+	}
     void clean(unsigned int vertex, unsigned int fragment)
     {
         // delete the shaders as they're linked into our program now and no longer necessary
         glDeleteShader(vertex);
         glDeleteShader(fragment);
     }
+	void clean(unsigned int compute)
+	{
+		// delete the shaders as they're linked into our program now and no longer necessary
+		glDeleteShader(compute);
+	}
 
     class Shader
     {
@@ -306,7 +337,7 @@ private:
         char** code;
     };
 
-    Shader *vertex_shader, *fragment_shader;
+    Shader *vertex_shader, *fragment_shader, *compute_shader;
 };
 class ModelLoader
 {
@@ -963,5 +994,16 @@ public:
         glBindVertexArray(0);
         glUseProgram(0);
     }
+};
+
+class advancedPipeline : public pipeline
+{
+public:
+	vector<ShaderProgram*> compute_programs;
+
+	void draw(unsigned int vao, unsigned int num)
+	{
+		// how to draw?? or define outside??
+	}
 };
 

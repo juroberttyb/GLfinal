@@ -985,6 +985,55 @@ public:
         }
     }
     grass;
+	class Water : public advancedPipeline
+	{
+	public:
+		unsigned int buffer, vao;
+		int vnum;
+
+		Water()
+		{
+			program = new ShaderProgram("obj/water/shader.vs", "obj/water/shader.fs");
+			for (int i = 0; i < 2; i++)
+			{
+				char buffer[60];
+				sprintf(buffer, "obj/water/shader%d.cs", i + 1); // what format do your shader files named with?
+				ShaderProgram *cp = new ShaderProgram(buffer);
+				compute_programs.push_back(cp);
+			}
+		}
+
+		void VAO()
+		{
+			// generate buffers??
+		}
+
+		void draw(_window* window)
+		{
+			for (int i = 0; i < compute_programs.size(); i++)
+			{
+				// --- maybe need to set view & project?? ---
+				compute_programs[i]->SetUniformMat("view", window->view);
+				compute_programs[i]->SetUniformMat("project", window->project);
+				// --- maybe need to set view & project?? ---
+
+				// set some uniforms??
+
+				// maybe draw with compute program here??
+			}
+			program->SetUniformMat("view", window->view);
+			program->SetUniformMat("project", window->project);
+
+			// set some uniforms??
+
+			glUseProgram(program->id);
+			glBindVertexArray(vao);
+			glDrawArrays(GL_TRIANGLES, 0, vnum);
+			glBindVertexArray(0);
+			glUseProgram(0);
+		}
+	}
+	water;
 
     float scaling = 0.01f;
 
