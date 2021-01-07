@@ -990,7 +990,7 @@ public:
 	public:
 		unsigned int buffer, vao;
 		int vnum;
-		unsigned int waterBufferIn, waterBufferOut;
+		GLuint waterBufferIn, waterBufferOut;
 		mat4 model = translate(mat4(1.0f), vec3(0.0, -5.0, 0.0));
 		float lastdrop = 0;
 		struct WaterColumn
@@ -1008,6 +1008,7 @@ public:
 				ShaderProgram *cp = new ShaderProgram(buffer);
 				compute_programs.push_back(cp);
 			}
+			VAO();
 		}
 		void AddDrop()
 		{
@@ -1023,6 +1024,8 @@ public:
 			// generate buffers??
 			glGenBuffers(1, &waterBufferIn);
 			glBindBuffer(GL_SHADER_STORAGE_BUFFER, waterBufferIn);
+			glGenBuffers(1, &waterBufferOut);
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, waterBufferOut);
 			// Create initial data.
 			WaterColumn *data = new WaterColumn[32400];
 			for (int x = 0; x < 180; ++x)
@@ -1036,9 +1039,6 @@ public:
 			}
 			glBufferStorage(GL_SHADER_STORAGE_BUFFER, sizeof(WaterColumn) * 32400, data, GL_DYNAMIC_STORAGE_BIT);
 			delete[] data;
-
-			glGenBuffers(1, &waterBufferOut);
-			glBindBuffer(GL_SHADER_STORAGE_BUFFER, waterBufferOut);
 			glBufferStorage(GL_SHADER_STORAGE_BUFFER, sizeof(WaterColumn) * 32400, NULL, GL_DYNAMIC_STORAGE_BIT);
 
 			glGenVertexArrays(1, &vao);
