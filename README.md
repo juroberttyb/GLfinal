@@ -13,9 +13,9 @@ H: HDR on/off <br/>
 pgUp/pgDn: 控制風力
 
 效果 <br/>
-SSAO與Normal mapping在原點, 中點橡樹有效 <br/>
-deferred rendering的multi light只在遠點橡樹有效 <br/>
-toon shading在中點橡樹有效 <br/>
+SSAO與Normal mapping在原點橡樹有效 <br/>
+deferred rendering的multi light只在中點橡樹有效 <br/>
+toon shading在遠點橡樹有效 <br/>
 
 進度表: https://docs.google.com/spreadsheets/d/18Z4K4RitCf1YPHfvBUpyMdoYZvHwg00s0Yi5LTxOerE/edit#gid=0 <br/>
 
