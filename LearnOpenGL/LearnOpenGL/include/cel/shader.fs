@@ -23,7 +23,7 @@ uniform float specular_power = 200.0;
 uniform int NormalOn;
 
 uniform sampler2D shadowMap;	
-uniform sampler1D cel;
+uniform sampler1D ramp;
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
@@ -43,9 +43,6 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 
 void main()
 {
-    // color = texture(texture_normal1, fs_in.texcoord);
-    // color = texture(texture_diffuse1, fs_in.texcoord);
-// /*
     vec3 N;
 
     if (NormalOn == 1)
@@ -68,8 +65,11 @@ void main()
     vec3 H = normalize(L + V);                                                
                                                                                    
     // Compute the diffuse and specular components for each fragment    
-    vec3 ambient = 0.3 * texture(texture_diffuse1, fs_in.texcoord).rgb; // * texture(ssao, fs_in.texcoord).r
-    vec3 diffuse = max(dot(N, L), 0.0) * texture(texture_diffuse1, fs_in.texcoord).rgb;  
+    vec3 ambient = 0.1 * texture(texture_diffuse1, fs_in.texcoord).rgb; // * texture(ssao, fs_in.texcoord).r
+    float index = 0.5 * dot(N, L) + 0.5;
+
+    vec3 diffuse = texture(ramp, index).g * texture(texture_diffuse1, fs_in.texcoord).rgb;  
+    // vec3 diffuse = max(dot(N, L), 0.0) * texture(texture_diffuse1, fs_in.texcoord).rgb;  
     vec3 specular = pow(max(dot(N, H), 0.0), specular_power) * texture(texture_specular1, fs_in.texcoord).rgb;
 
     // color = vec4((ambient + diffuse + specular), 1.0);
@@ -77,8 +77,4 @@ void main()
     vec3 lighting = ambient + (1.0 - shadow) * (diffuse + specular);
 
     color = vec4(lighting, 1.0);
-    
-    float index = pow(max(dot(N, L), 0.0), 5.0);
-    color = texture(cel, index) * (index * 0.8 + 0.2);;
-// */
 }
